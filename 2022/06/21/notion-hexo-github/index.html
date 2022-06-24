@@ -1,0 +1,1067 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Jerry">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="使用Notion作为基础的知识库管理软件用于编写md文件，Hexo作为博客发布工具，GithubPages作为Hexo的Web应用服务器，GithubActions用于将Notion的Pages同步到GithubPages">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Notion+Hexo+Github搭建技术博客">
+<meta property="og:url" content="https://kissy.wiki/2022/06/21/notion-hexo-github/index.html">
+<meta property="og:site_name" content="Jerry 的技术博客">
+<meta property="og:description" content="使用Notion作为基础的知识库管理软件用于编写md文件，Hexo作为博客发布工具，GithubPages作为Hexo的Web应用服务器，GithubActions用于将Notion的Pages同步到GithubPages">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kissy.wiki/notion_images/e1b809c84f6f8828294edb8522641775.png">
+<meta property="article:published_time" content="2022-06-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-23T00:45:00.514Z">
+<meta property="article:author" content="Jerry">
+<meta property="article:tag" content="blog">
+<meta property="article:tag" content="hexo">
+<meta property="article:tag" content="notion">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kissy.wiki/notion_images/e1b809c84f6f8828294edb8522641775.png">
+  
+  
+  
+  <title>使用Notion+Hexo+Github搭建技术博客 - Jerry 的技术博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kissy.wiki","root":"/","version":"1.9.2","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":3},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":"ture","follow_dnt":true,"baidu":"75f8d971da6d372cc0c437d1ca828b7f","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?75f8d971da6d372cc0c437d1ca828b7f";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jerry的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">使用Notion+Hexo+Github搭建技术博客</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-21 00:00" pubdate>
+          2022年6月21日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          9.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          读完大约需要 23 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="分类1"
+        id="heading-8398f969402f7f864f698afa28252ff3" role="tab" data-toggle="collapse" href="#collapse-8398f969402f7f864f698afa28252ff3"
+        aria-expanded="true"
+      >
+        分类1
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8398f969402f7f864f698afa28252ff3"
+           role="tabpanel" aria-labelledby="heading-8398f969402f7f864f698afa28252ff3">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="分类2"
+        id="heading-8c05be3470774b1e01ed9ac8d804e394" role="tab" data-toggle="collapse" href="#collapse-8c05be3470774b1e01ed9ac8d804e394"
+        aria-expanded="true"
+      >
+        分类2
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c05be3470774b1e01ed9ac8d804e394"
+           role="tabpanel" aria-labelledby="heading-8c05be3470774b1e01ed9ac8d804e394">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="分类3"
+        id="heading-1e5a6979f799de1d382a98d0fc81622c" role="tab" data-toggle="collapse" href="#collapse-1e5a6979f799de1d382a98d0fc81622c"
+        aria-expanded="true"
+      >
+        分类3
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1e5a6979f799de1d382a98d0fc81622c"
+           role="tabpanel" aria-labelledby="heading-1e5a6979f799de1d382a98d0fc81622c">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/21/notion-hexo-github/" title="使用Notion+Hexo+Github搭建技术博客"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">使用Notion+Hexo+Github搭建技术博客</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="分类2"
+        id="heading-8c05be3470774b1e01ed9ac8d804e394" role="tab" data-toggle="collapse" href="#collapse-8c05be3470774b1e01ed9ac8d804e394"
+        aria-expanded="true"
+      >
+        分类2
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c05be3470774b1e01ed9ac8d804e394"
+           role="tabpanel" aria-labelledby="heading-8c05be3470774b1e01ed9ac8d804e394">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="分类3"
+        id="heading-1e5a6979f799de1d382a98d0fc81622c" role="tab" data-toggle="collapse" href="#collapse-1e5a6979f799de1d382a98d0fc81622c"
+        aria-expanded="true"
+      >
+        分类3
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1e5a6979f799de1d382a98d0fc81622c"
+           role="tabpanel" aria-labelledby="heading-1e5a6979f799de1d382a98d0fc81622c">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/21/notion-hexo-github/" title="使用Notion+Hexo+Github搭建技术博客"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">使用Notion+Hexo+Github搭建技术博客</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="分类3"
+        id="heading-1e5a6979f799de1d382a98d0fc81622c" role="tab" data-toggle="collapse" href="#collapse-1e5a6979f799de1d382a98d0fc81622c"
+        aria-expanded="true"
+      >
+        分类3
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1e5a6979f799de1d382a98d0fc81622c"
+           role="tabpanel" aria-labelledby="heading-1e5a6979f799de1d382a98d0fc81622c">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/21/notion-hexo-github/" title="使用Notion+Hexo+Github搭建技术博客"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">使用Notion+Hexo+Github搭建技术博客</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">使用Notion+Hexo+Github搭建技术博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <div class="note note-info">
+            <p>目前主流的个人博客解决方案大致如下：</p><p>1、WordPress：<a target="_blank" rel="noopener" href="https://wordpress.org/">WordPress</a>生态插件丰富非常容易搭建个人博客，上手也比较容易。但是问题在于WordPress需要独立的空间部署，需要使用数据库等，这就意味着我们需要去租赁云空间、系统上线需要经常备份维护等，长年累月下来就懒得打理逐渐荒废了。</p><p>2、Hexo：<a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>可以快速、简洁且高效的博客框架，功能插件丰富UI界面友好，Hexo编译后会生成静态文件不需要数据库连接等，直接挂到GithubPages即可。但是使用Hexo发布文章需要一个强大的Markdown软件，目前没有一个能和语雀、Notion等丰富度匹配的md编辑器，所以直接使用Hexo相对来说比较麻烦。</p><p>3、语雀：<a target="_blank" rel="noopener" href="https://www.yuque.com/kissy">语雀</a> 是蚂蚁金服推出的一款知识库软件，我也用了语雀将近2年时间，语雀的知识库目录和文章目录功能比较强大，非常适合于个人知识库和笔记。但是如果想要搭建博客，则模板比较单一而且不能自定义主题等，而且文档发布过程中不方便与Hexo的<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/front-matter">YAML FrontMatter</a>集成，总的来说语雀在灵活度上有所欠缺对外扩展不方便。另外，如果是语雀重度用户要发布Hexo博客可以参考： <a target="_blank" rel="noopener" href="https://github.com/x-cold/yuque-hexo">https://github.com/x-cold/yuque-hexo</a> （他可以通过自动化的方式将语雀的文章发布到hexo等主流的博客系统之上）。</p><p>4、Notion：<a target="_blank" rel="noopener" href="https://www.notion.so/">Notion</a> 相对于其他的博客或者在线文档的服务，Notion 是目前自由度最高的，可以任意地调整页面的布局，插入和引用 database、block等，还支持各种组件、模板、在线写作等。但是Notion想要做个人博客在UI和精细程度上还有所欠缺。</p><p>综上所述，有没有一款工具既有Notion的灵活性，又能与Hexo主流博客系统对接？答案是只有自己撸一套，几经折腾打算采用如下解决方案：<code>使用Notion作为基础的知识库管理软件用于编写md文件，Hexo作为博客发布工具，GithubPages作为Hexo的Web应用服务器，GithubActions用于将Notion的Pages同步到GithubPages</code>。</p>
+          </div>
+
+<h1 id="1-基础环境搭建"><a href="#1-基础环境搭建" class="headerlink" title="1.基础环境搭建"></a>1.基础环境搭建</h1><p>在开始搭建之前，需要准备以下几样东西：</p>
+<ul>
+<li>本地安装 node.js</li>
+<li>本地安装 git</li>
+<li>一个 github 账号</li>
+<li>创建一个 github 仓库</li>
+</ul>
+<h2 id="1-1-本地安装node-js"><a href="#1-1-本地安装node-js" class="headerlink" title="1.1 本地安装node.js"></a>1.1 本地安装node.js</h2><p><code>Windows</code>系统可以在<a target="_blank" rel="noopener" href="https://nodejs.org/zh-cn/download/">这里</a>下载<code>installer</code> 安装包进行安装。</p>
+<p><code>Mac</code>系统可以在<a target="_blank" rel="noopener" href="https://nodejs.org/zh-cn/download/">这里</a>下载<code>pkg</code>安装包，也可以使用<code>homebrew</code>进行安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装命令</span><br>% brew install node<br><span class="hljs-comment"># 安装验证</span><br>% node -v<br>v16.15.1<br></code></pre></td></tr></table></figure>
+
+<h2 id="1-2-本地安装git"><a href="#1-2-本地安装git" class="headerlink" title="1.2 本地安装git"></a>1.2 本地安装git</h2><p><code>Windows</code> 系统可以从<a target="_blank" rel="noopener" href="https://gitforwindows.org/">这里</a>下载安装包后进行安装。<code>Mac</code>系统可以从<a target="_blank" rel="noopener" href="https://sourceforge.net/projects/git-osx-installer/">这里</a>下载安装包进行安装。也可以使用<code>homebrew</code>进行安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装指令</span><br>brew install git<br><span class="hljs-comment"># 验证安装</span><br>git --version<br><span class="hljs-comment"># 设置自己的用户名和邮箱</span><br>git config --global user.name <span class="hljs-string">&quot;你的用户名&quot;</span> <br>git config --global user.email <span class="hljs-string">&quot;你的邮箱&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="1-3-github账号"><a href="#1-3-github账号" class="headerlink" title="1.3 github账号"></a>1.3 github账号</h2><p><strong>1）首先注册账号</strong></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/join?source=header-home">点击这里</a>需要注册一个<code>Github</code>账号，创建好账号之后，我们还需要把我们本地的<code>SSH Key</code> 添加到<code>Github</code> 中去，这样我们之后才能有权限将本地代码推送到<code>Github</code> 中，先本地生成一对<code>RSA</code> 密钥：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用默认参数，回车键连敲三次</span><br>ssh-keygen -t rsa -b 4096 -C <span class="hljs-string">&quot;你的邮箱&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2）将ssh-key添加到github</strong></p>
+<ul>
+<li>Windwos用户在:<code>C://用户//admin//.ssh</code> 目录下，Mac用户在<code>~./ssh</code> 目录下。</li>
+</ul>
+<p>复制<code>id_rsa.pub</code>文件里的信息，然后到<a target="_blank" rel="noopener" href="https://github.com/settings/keys">这里</a>添加新的<code>SSHKEY</code>。</p>
+<p><img src="/notion_images/01f62e9bcd47fffbf7f7ce79357433bb.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-4-启用github-pages"><a href="#1-4-启用github-pages" class="headerlink" title="1.4 启用github-pages"></a>1.4 启用github-pages</h2><p>GithubPages 可以理解为Github提供的免费网页空间，可以用来存放你的静态网页文件，并通过 <a target="_blank" rel="noopener" href="https://用户名.github.io/%E9%A1%B9%E7%9B%AE%E5%90%8D/"><code>https://用户名.github.io</code></a> 或者 <a target="_blank" rel="noopener" href="https://用户名.github.io/%E9%A1%B9%E7%9B%AE%E5%90%8D/"><code>https://用户名.github.io/项目名/</code></a> 的方式来访问。</p>
+<p>开启的方式也非常简单，只需要在<a target="_blank" rel="noopener" href="https://github.com/new">这里</a>创建相应的公共仓库并将仓库名称设置为：<code>用户名.github.io</code> 即可。</p>
+<p><img src="/notion_images/4deafefc93b3f3d43c9333b5b7f3b03e.png" srcset="/img/loading.gif" lazyload></p>
+<p>如果使用了其他分支作为仓库代码，可以在github pages里边修改：</p>
+<p><img src="/notion_images/e5a622e953cea730d0b6a3e03a3984c3.png" srcset="/img/loading.gif" lazyload></p>
+<p>修改完成之后就可以使用  <a target="_blank" rel="noopener" href="https://用户名.github.io/%E9%A1%B9%E7%9B%AE%E5%90%8D/">https:&#x2F;&#x2F;用户名.github.io</a> 地址进行访问了（创建完成若未正常显示，可以稍等几分钟刷新再试）</p>
+<h1 id="2-部署Hexo"><a href="#2-部署Hexo" class="headerlink" title="2.部署Hexo"></a>2.部署Hexo</h1><p>Hexo是一款静态网站生成工具，可以根据设置的主题样式和配置文件，来生成丰富多彩的网页，通常配置文件设置好之后不需要经常修改，我们只需要负责写好我们的博文，写好之后就能使用命令一键生成网站，而且还可以为所欲为的切换主题。</p>
+<p><strong>1）Hexo安装</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">% npm install -g hexo-cli<br>% hexo -v<br></code></pre></td></tr></table></figure>
+
+<p><strong>2）使用Hexo新建本地博客</strong></p>
+<p>选择一个常用的工作空间目录，进入到该目录初始化Hexo项目：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">% hexo init blog<br>% <span class="hljs-built_in">cd</span> blog<br>% npm install<br></code></pre></td></tr></table></figure>
+
+<p>新建完成之后，blog目录如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">% tree -L 1<br>.<br>├── _config.landscape.yml<br>├── _config.yml<br>├── node_modules<br>├── package-lock.json<br>├── package.json<br>├── scaffolds<br>├── <span class="hljs-built_in">source</span><br>└── themes<br></code></pre></td></tr></table></figure>
+
+<p><code>_config.yml</code> 是配置文件，里面有很多可以配置的数据，这里暂时不多介绍，后面的文章里会进行详细说明。</p>
+<p><code>package.json</code> 是应用程序信息，通常不需要关心。</p>
+<p><code>node_modules</code> 用来存放 <code>node</code> 相关的模块，通常不需要关心。</p>
+<p><code>scaffolds</code> 里面是模版文件，也就是每次新建文章时，都会根据模版文件来创建对应的 <code>md</code> 文件，这一点也会在后续的文章里进行详细介绍。</p>
+<p><code>source</code> 是资源文件夹，用来存放用户资源的地方。除 <code>_posts</code> 文件夹之外，开头命名为 _ (下划线)的文件 &#x2F; 文件夹和隐藏的文件将会被忽略。</p>
+<p><code>theme</code> 是主题文件夹，每个主题的配置都会有些不一样，需要根据具体主题情况来定，后续介绍主题的文章里会有说明。</p>
+<p><strong>3）本地运行Hexo</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">% hexo server<br>INFO  Validating config<br>INFO  Start processing<br>INFO  Hexo is running at http://localhost:4000/ . Press Ctrl+C to stop.<br></code></pre></td></tr></table></figure>
+
+<p>浏览器访问： <a target="_blank" rel="noopener" href="http://localhost:4000/"><code>http://localhost:4000/</code></a></p>
+<p><img src="/notion_images/92c39b1ea2c37f4e0057889891b7be5d.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3-使用github-action自动发布"><a href="#3-使用github-action自动发布" class="headerlink" title="3.使用github-action自动发布"></a>3.使用github-action自动发布</h1><p>Hexo博客部署发布使用的是静态HTML文件，如果想要在互联网发布文章则需要进行deploy操作，为此我们将使用GithubPages作为我们的Web服务。这样一来我们需要维护一个Hexo源码分支用于存放Hexo源文件以及md文件等，使用另外一个分支发布我们的静态资源。每次提交代码并打包发布是一项繁琐的操作，我们可以用使用Actions实现流水线自动发布，Actions可以参考<a target="_blank" rel="noopener" href="https://docs.github.com/cn/actions">这里</a>。</p>
+<p>由于Hexo和相应的主题与配置等涉及到一些个性化的参数配置，基于安全因素考虑，我们可以使用两个仓库用于博客代码管理，一个<code>私有仓库</code>存放Blog原生代码和Ation用于触发流水线，另外一个<code>公共仓库</code>用于存放编译后的HTML代码，具体流程如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">本地Hexo编写md文件 --&gt; git提交至blog仓库（private）--&gt; 触发actions --&gt; 部署至用户名.github.io仓库(public)<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-1、首先，新建blog仓库"><a href="#3-1、首先，新建blog仓库" class="headerlink" title="3.1、首先，新建blog仓库"></a>3.<strong>1、首先，新建blog仓库</strong></h2><p>在<a target="_blank" rel="noopener" href="https://github.com/new">这里</a>新建一个私有仓</p>
+<p><img src="/notion_images/266d4025ed2e3ed474e8be8875620234.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="3-2、将本地Hexo代码提交至私有仓库"><a href="#3-2、将本地Hexo代码提交至私有仓库" class="headerlink" title="3.2、将本地Hexo代码提交至私有仓库"></a>3.<strong>2、将本地Hexo代码提交至私有仓库</strong></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">% <span class="hljs-built_in">cd</span> blogs<br>% git init<br>% git add .<br>% git commit -m <span class="hljs-string">&quot;first commit&quot;</span><br>% git branch -M main<br>% git remote add origin git@github.com:你的私有仓库地址.git<br>% git push -u origin main<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-3、使用github-action自动提交部署博客"><a href="#3-3、使用github-action自动提交部署博客" class="headerlink" title="3.3、使用github-action自动提交部署博客"></a>3.<strong>3、使用github-action自动提交部署博客</strong></h2><p>1<strong>）生成SSH秘钥</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">% <span class="hljs-built_in">cd</span> ~/.ssh<br>% ssh-keygen -f hexo-deploy-key -t rsa -C <span class="hljs-string">&quot;你的邮箱&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>以上命令会在<code>~/.ssh</code>路径下生成：秘钥<code>hexo-deploy-key</code> 和公钥<code>hexo-deploy-key.pub</code>，然后分别添加到对应的文件中。</p>
+<p><code>页面文件仓库（public）</code>: 在 Settings &gt; Deploy keys 中添加Deploy Key，内容为hexo-deploy-key.pub 文件内容，同时勾选 Allow write access 选项。</p>
+<p><code>博客源文件库(private)</code>：在Settings &gt; Secrets中添加一个Secret，名称为 DEPLOY_KEY，内容为 hexo-deploy-key 文件内容。后续在 Workflow中通过名称 DEPLOY_KEY 使用这个密钥。</p>
+<p><strong>2）添加Hexo Deploy</strong></p>
+<p>Hexo 提供了快速方便的一键部署功能，让您只需一条命令就能将网站部署到服务器上。Hexo-Deploy相关知识可以参考<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/one-command-deployment.html">这里</a>。</p>
+<p>为了能够方便使用Hexo Deploy 首先要进行插件安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在项目路径下执行</span><br>% npm install hexo-deployer-git --save<br></code></pre></td></tr></table></figure>
+
+<p>安装成功后，修改 Hexo 源文件夹下的 _config.yml <code>将repo 地址设置为公共仓库地址</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># Deployment</span><br><span class="hljs-comment">## Docs: https://hexo.io/docs/one-command-deployment</span><br>deploy:<br>  <span class="hljs-built_in">type</span>: <span class="hljs-string">&#x27;git&#x27;</span><br>  repo: git@github.com:kissycn/你的公共仓库地址.git<br>  branch: [main]<br></code></pre></td></tr></table></figure>
+
+<p><strong>3）添加action流水线脚本</strong></p>
+<p>为了能够提交代码时执行自动构建，需要在私有仓库页面创建流水线，并在 push 时触发。</p>
+<p>在私有仓库项目页面新建流水线脚本：</p>
+<p><img src="/notion_images/4fe924d83ea60a82c9da258707f9c7e3.png" srcset="/img/loading.gif" lazyload></p>
+<p>私有仓库<code>/.github/workflows/main.yml</code>文件内容如下（记得修改相应参数：<code>user.email</code>   <code>user.name</code>）</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">Blog</span> <span class="hljs-string">deploy</span><br><br><span class="hljs-comment"># Controls when the workflow will run</span><br><span class="hljs-attr">on:</span><br>  <span class="hljs-comment"># Triggers the workflow on push or pull request events but only for the main branch</span><br>  <span class="hljs-attr">push:</span><br>    <span class="hljs-attr">branches:</span> [ <span class="hljs-string">main</span> ]<br><br>  <span class="hljs-comment"># Allows you to run this workflow manually from the Actions tab</span><br>  <span class="hljs-attr">workflow_dispatch:</span><br><br><span class="hljs-comment"># A workflow run is made up of one or more jobs that can run sequentially or in parallel</span><br><span class="hljs-attr">jobs:</span><br>  <span class="hljs-comment"># This workflow contains a single job called &quot;build&quot;</span><br>  <span class="hljs-attr">build-and-deploy:</span><br>    <span class="hljs-comment"># The type of runner that the job will run on</span><br>    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span><br><br>    <span class="hljs-comment"># Steps represent a sequence of tasks that will be executed as part of the job</span><br>    <span class="hljs-attr">steps:</span><br>      <span class="hljs-comment"># Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v2</span><br><br>      <span class="hljs-comment"># Runs a set of commands using the runners shell</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Set</span> <span class="hljs-string">Node</span><br>        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v2</span><br>        <span class="hljs-attr">with:</span><br>          <span class="hljs-attr">node-version:</span> <span class="hljs-string">&#x27;14&#x27;</span><br><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Npm</span> <span class="hljs-string">Install</span><br>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">          npm install hexo-cli -g</span><br><span class="hljs-string">          npm install</span><br><span class="hljs-string"></span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Set</span> <span class="hljs-string">Key</span><br>        <span class="hljs-attr">env:</span><br>          <span class="hljs-attr">DEPLOY_KEY:</span> <span class="hljs-string">$&#123;&#123;</span> <span class="hljs-string">secrets.DEPLOY_KEY</span> <span class="hljs-string">&#125;&#125;</span><br>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">          mkdir -p ~/.ssh</span><br><span class="hljs-string">          echo &quot;$DEPLOY_KEY&quot; &gt; ~/.ssh/id_rsa</span><br><span class="hljs-string">          chmod 600 ~/.ssh/id_rsa</span><br><span class="hljs-string">          ssh-keyscan github.com &gt;&gt; ~/.ssh/known_hosts</span><br><span class="hljs-string">          git config --global user.email &quot;你的邮箱&quot;</span><br><span class="hljs-string">          git config --global user.name &quot;你的github用户名&quot;</span><br><span class="hljs-string"></span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Hexo</span> <span class="hljs-string">Deploy</span><br>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">          hexo clean</span><br><span class="hljs-string">          hexo generate</span><br><span class="hljs-string">          hexo deploy</span><br></code></pre></td></tr></table></figure>
+
+<p>点击Commit按钮会触发相应的流水线操作，流水线执行结果可以在：<code>Actions → Workflows → Blog Deploy → build and deploy</code> </p>
+<p><img src="/notion_images/080df2aed454253b3e7536f85e323ae5.png" srcset="/img/loading.gif" lazyload></p>
+<p>完了可以在：<code>用户名.github.io 仓库（public）</code>下查看自动部署后的文件，并在浏览器访问仓库地址，可以看到Hexo被提交到了仓库。</p>
+<p><strong>3.4）新的变更</strong></p>
+<p>流水线创建成功后，我们向Hexo仓库提交源代码，会自动触发Actions构建操作，这样就能实现博客文章自动发布功能。</p>
+<div class="note note-warning">
+            <p>如果大家觉着每次提交代码都会触发编译发布比较鸡肋，也可以将发布流水线改成手动。</p>
+          </div>
+
+<h1 id="4-同步notion数据到博客"><a href="#4-同步notion数据到博客" class="headerlink" title="4.同步notion数据到博客"></a>4.同步notion数据到博客</h1><p>Notion是一个全能工作空间，Notion 可以帮助你创建几乎你需要的所有东西，包括：</p>
+<ul>
+<li>文档</li>
+<li>数据库</li>
+<li>知识库</li>
+<li>项目管理</li>
+<li>生产力系统</li>
+<li>世界上最美丽的笔记…</li>
+</ul>
+<p>Notion 中文站点：<a target="_blank" rel="noopener" href="https://notionchina.co/">https://notionchina.co/</a></p>
+<p>Notion 官放站点：<a target="_blank" rel="noopener" href="http://notion.so/">notion.so</a></p>
+<p>Notion 入门视频：<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1DB4y1C7Af">https://www.bilibili.com/video/BV1DB4y1C7Af</a></p>
+<p>以上文档和视频非常详细的介绍了Notion注册、使用教程，此不再赘述。</p>
+<h2 id="4-1-使用notion数据库管理博客"><a href="#4-1-使用notion数据库管理博客" class="headerlink" title="4.1 使用notion数据库管理博客"></a>4.1 使用notion数据库管理博客</h2><p>Notion 作为一款非常灵活的博客管理工具，其Database功能具备良好的扩展性，可以通过自定义字段来与Hexo的<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/front-matter">YAML FrontMatter</a>集成，这样就非常方便的通过自动化的方式将Notion的文章发布到我们的Github-Pages上，本次集成参考的技术方案为 <a target="_blank" rel="noopener" href="https://lailin.xyz/post/notion-markdown-blog.html">mohuishou的技术博客</a>，具体集成过程如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">用户在Notion编写文章</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">将文档移动到待发布状态</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">手动触发Actions</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">使用NotionAPI同步Pages到Github</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">触发Github自动编译并发布</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">将文章在Notion更新为已发布</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>1）建立NotionDatabase</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.notion.so/3999b0ae72364a4b99a87f7d9d0a52be">点击这里</a>，复制 mohuishou 同学的NotionTemplate到自己的Notion。</p>
+<p><img src="/notion_images/36229ec5b958d647221390f2c1885135.png" srcset="/img/loading.gif" lazyload></p>
+<p>上述为Notion的Database，通过看板可以看到Notion的文档分成了几种状态，其流转过程如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">idea</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">放入收集箱</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">编写文章</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">移动到待发布</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">点击执行</span> <span class="hljs-string">github</span> <span class="hljs-string">workflow</span> <span class="hljs-string">-&gt;</span> <span class="hljs-string">自动发布</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2）Notion Database 为文章添加字段</strong></p>
+<p>通过Notion的Database为每篇文章定义了众多字段，其含义如下：</p>
+<ul>
+<li><strong>status</strong>：为了避免每次都获取所有的文章数据，我们添加一个 status 字段，当 status 为 待发布 的时候我们才去下载对应的文章，文章下载完成之后，我们就把这篇文章的状态修改为 已发布</li>
+<li><strong>tags：</strong>Hexo 博客对应的标签</li>
+<li><strong>categories：</strong>Hexo对应的分类</li>
+<li><strong>urlname：</strong>Hexo文章发布后的url地址</li>
+<li><strong>date：</strong>Hexo文章发布时间</li>
+<li><strong>show-category</strong>：Hexo文章所述分类</li>
+<li><strong>index_img</strong>：Hexo文章的封面图</li>
+<li><strong>excerpt：</strong>Hexo文章节选描述</li>
+</ul>
+<p><img src="/notion_images/5878e2337380c983bcebe2b32617c93c.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-2-使用Actions同步博客数据到Github"><a href="#4-2-使用Actions同步博客数据到Github" class="headerlink" title="4.2 使用Actions同步博客数据到Github"></a>4.2 使用Actions同步博客数据到Github</h2><p>想要将Notion的Pages同步到Database主要是通过NotionAPI将 <code>Notion Page</code> 转换为<code>Markdown</code>文件，然后就可以直接使用 Hugo、Hexo 等。虽然现在Notion官方开放了API，但是没有API可以直接将Notion 的数据结构之间转换为Markdown，现在虽然有一些第三方库（例如 notion2md ）支持，但是存在着各种各样的问题，要么不支持图片，要么不支持table等格式，总是会欠缺，为此对于Notion Page的同步采用 mohuishou同学的编写的同步代码，<a target="_blank" rel="noopener" href="https://github.com/mohuishou/notion-blog-actions">仓库地址点这里</a>。</p>
+<p><strong>1）fork pages的同步代码到自己的仓库</strong></p>
+<p><img src="/notion_images/22d6cce3f2b31bbfd45fc65e93053089.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>2）获取Notion 需要用到的参数</strong></p>
+<p>Notion的API调用需要用到几个参数： <code>NOTION_TOKEN、NOTION_TOKEN_V2、space_id、database_id</code></p>
+<p>1、获取<code>NOTION_TOKEN</code></p>
+<p>点击<a target="_blank" rel="noopener" href="https://www.notion.so/my-integrations">这里</a>添加一个notion-integration</p>
+<p><img src="/notion_images/a384fd08037e6e73c9552a6e5449948f.png" srcset="/img/loading.gif" lazyload></p>
+<p>赋予对应的权限</p>
+<p><img src="/notion_images/015f877376eb34a20d23c5bf24013cb5.png" srcset="/img/loading.gif" lazyload></p>
+<p>点击show就得到了<code>NOTION_TOKEN</code></p>
+<p><img src="/notion_images/110d905f7bded3a8236b6464d7975897.png" srcset="/img/loading.gif" lazyload></p>
+<p>将Notion Database分享给刚刚创建的integration，在需要使用API的页面中，点击Share并选择Invite ，将机器人邀请进去，让其用于编辑的权限。</p>
+<p>2、获取<code>NOTION_TOKEN_V2</code></p>
+<p>通过网页打开 <a target="_blank" rel="noopener" href="https://www.notion.so/">https://www.notion.so/</a> 并登录，打开浏览器的开发者模式：Application&gt;Cookies&gt;token_v2 即可获取</p>
+<p>3、获取<code>space_id</code></p>
+<p>通过网页打开 <a target="_blank" rel="noopener" href="https://www.notion.so/">https://www.notion.so/</a> 并登录，打开浏览器的开发者模式：Application&gt;Cookies&gt;notion_user_id 即可获取</p>
+<p>4、获取<code>database_id</code></p>
+<p>获取数据表的 database_id，点击数据表右上方的 … 选择 Copylink ，连接如下方：<a target="_blank" rel="noopener" href="https://www.notion.so/9bcf00dce55c42799f3b177dc325aa18">https://www.notion.so/xinhuoip/9bcf00dce55c42799f3b177dc325aa18?v=217bbe82893e4e4aa228a19f3f2dc888</a>   其中：<a target="_blank" rel="noopener" href="https://www.notion.so/851d6c61c250495f9337be5527360d68">9bcf00dce55c42799f3b177dc325aa18</a> 即为 <code>database_id</code> </p>
+<p><strong>3）在Github添加secrets</strong></p>
+<p>在上面建立的<code>私有仓库（存放Hexo源码的那个仓库)</code>的仓库里边添加TOKEN的环境变量：</p>
+<p> <code>blog私有仓库—&gt;settings—&gt;secrets—&gt;actions—&gt;New repository secret</code></p>
+<p><img src="/notion_images/cf8c2e380bdae147bbc5aa81087039a5.png" srcset="/img/loading.gif" lazyload></p>
+<p>4<strong>）编写触发的Actions</strong></p>
+<p>在<code>私有仓库（存放Hexo源码的那个仓库)</code>仓库中添加Actions，blogs&#x2F;.github&#x2F;workflows&#x2F;notion-hexo.yml：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">on:</span> [<span class="hljs-string">workflow_dispatch</span>, <span class="hljs-string">watch</span>]<br><br><span class="hljs-attr">name:</span> <span class="hljs-string">notion</span><br><br><span class="hljs-attr">jobs:</span><br>  <span class="hljs-attr">notion:</span><br>    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span><br>    <span class="hljs-attr">steps:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">&quot;test&quot;</span><br>      <span class="hljs-attr">run :</span> <span class="hljs-string">|</span><br><span class="hljs-string">        echo $&#123;&#123; secrets.NOTION_TOKEN &#125;&#125;</span><br><span class="hljs-string">        echo $&#123;&#123; secrets.NOTION_TOKEN_V2 &#125;&#125;</span><br><span class="hljs-string"></span>        <br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@master</span><br>      <span class="hljs-attr">with:</span><br>        <span class="hljs-attr">submodules:</span> <span class="hljs-literal">false</span><br><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">修改为你fork的仓库代码地址/notion-blog-actions/notion@main</span><br>      <span class="hljs-attr">with:</span><br>        <span class="hljs-attr">token:</span> <span class="hljs-string">$&#123;&#123;</span> <span class="hljs-string">secrets.NOTION_TOKEN</span> <span class="hljs-string">&#125;&#125;</span><br>        <span class="hljs-attr">token_v2:</span> <span class="hljs-string">$&#123;&#123;</span> <span class="hljs-string">secrets.NOTION_TOKEN_V2</span> <span class="hljs-string">&#125;&#125;</span><br>        <span class="hljs-attr">space_id:</span> <span class="hljs-string">&quot;你的spaceid&quot;</span><br>        <span class="hljs-attr">database_id:</span> <span class="hljs-string">&quot;你的database_id&quot;</span><br>        <span class="hljs-attr">output:</span> <span class="hljs-string">&quot;./tmp/&quot;</span><br><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">&quot;migrate image&quot;</span><br>      <span class="hljs-attr">uses:</span> <span class="hljs-string">修改为你fork的仓库代码地址/notion-blog-actions/migrate@main</span><br>      <span class="hljs-attr">with:</span><br>        <span class="hljs-attr">input:</span> <span class="hljs-string">&quot;./tmp/*.md&quot;</span><br><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">&quot;cp md files&quot;</span><br>      <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">        cp -f tmp/*.md source/_posts/notion/</span><br><span class="hljs-string">        rm -rf tmp</span><br><span class="hljs-string"></span>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">git</span> <span class="hljs-string">setting</span><br>      <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">        git config --global user.email &quot;你的邮箱&quot;</span><br><span class="hljs-string">        git config --global user.name &quot;你的用户名&quot;</span><br><span class="hljs-string"></span>      <br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">update</span> <span class="hljs-string">blog</span><br>      <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">        git add source</span><br><span class="hljs-string">        git commit -m &quot;feat: auto update by notion sync&quot;</span><br><span class="hljs-string">        git push</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>5）在github-actions页面可完成流水线的手动触发</strong></p>
+<p>如此一来我们就是实现了将Notion的Pages自动发布到GithubPages，大家可以根据自己使用习惯和使用方式做调整。</p>
+<h1 id="5-参考"><a href="#5-参考" class="headerlink" title="5. 参考"></a>5. 参考</h1><p><strong><strong>使用 Notion Database 管理静态博客文章：</strong></strong><a target="_blank" rel="noopener" href="https://lailin.xyz/post/notion-markdown-blog.html">https://lailin.xyz/post/notion-markdown-blog.html</a></p>
+<p><strong>Notion API 简单上手：</strong><a target="_blank" rel="noopener" href="https://ews.ink/tech/dev-notion-api/">https://ews.ink/tech/dev-notion-api/</a></p>
+<p><strong><strong>notion API使用：</strong></strong><a target="_blank" rel="noopener" href="https://www.zdl.im/article/notionapi">https://www.zdl.im/article/notionapi</a></p>
+<p><strong>使用Hexo+github pages+travis ci搭建好看的个人博客：</strong> <a target="_blank" rel="noopener" href="https://mfrank2016.github.io/breeze-blog/2020/05/02/hexo/hexo-start/">https://mfrank2016.github.io/breeze-blog/2020/05/02/hexo/hexo-start/</a></p>
+<p><strong>利用 Github Actions 自动化部署 Hexo 博客：</strong><a target="_blank" rel="noopener" href="https://dreamhomes.top/posts/202111101556/">https://dreamhomes.top/posts/202111101556/</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E7%B1%BB1/" class="category-chain-item">分类1</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E7%B1%BB1/%E5%88%86%E7%B1%BB2/" class="category-chain-item">分类2</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E7%B1%BB1/%E5%88%86%E7%B1%BB2/%E5%88%86%E7%B1%BB3/" class="category-chain-item">分类3</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/blog/">#blog</a>
+      
+        <a href="/tags/hexo/">#hexo</a>
+      
+        <a href="/tags/notion/">#notion</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>使用Notion+Hexo+Github搭建技术博客</div>
+      <div>https://kissy.wiki/2022/06/21/notion-hexo-github/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Jerry</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年6月21日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/06/21/undefined/" title="1.基础数据类型与容器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">1.基础数据类型与容器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/06/21/docker-file/" title="Docker镜像命令">
+                        <span class="hidden-mobile">Docker镜像命令</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'kissycn/hexo-comment');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

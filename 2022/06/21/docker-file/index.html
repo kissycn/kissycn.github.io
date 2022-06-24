@@ -1,0 +1,1072 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Jerry">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Dockerfile的使用机器注意事项">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker镜像命令">
+<meta property="og:url" content="https://kissy.wiki/2022/06/21/docker-file/index.html">
+<meta property="og:site_name" content="Jerry 的技术博客">
+<meta property="og:description" content="Dockerfile的使用机器注意事项">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
+<meta property="article:published_time" content="2022-06-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-24T15:06:42.382Z">
+<meta property="article:author" content="Jerry">
+<meta property="article:tag" content="Dockerfile">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
+  
+  
+  
+  <title>Docker镜像命令 - Jerry 的技术博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kissy.wiki","root":"/","version":"1.9.2","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":3},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":"ture","follow_dnt":true,"baidu":"75f8d971da6d372cc0c437d1ca828b7f","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?75f8d971da6d372cc0c437d1ca828b7f";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jerry的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Docker镜像命令</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-21 00:00" pubdate>
+          2022年6月21日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          读完大约需要 20 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="云原生"
+        id="heading-03eadd6d06506d54fb81026b2f5963c8" role="tab" data-toggle="collapse" href="#collapse-03eadd6d06506d54fb81026b2f5963c8"
+        aria-expanded="true"
+      >
+        云原生
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-03eadd6d06506d54fb81026b2f5963c8"
+           role="tabpanel" aria-labelledby="heading-03eadd6d06506d54fb81026b2f5963c8">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="true"
+      >
+        Docker基础
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="Docker镜像命令"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Docker镜像命令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="true"
+      >
+        Docker基础
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="Docker镜像命令"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Docker镜像命令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="true"
+      >
+        Docker基础
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="Docker镜像命令"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Docker镜像命令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Docker镜像命令</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <div class="note note-success">
+            <p>Dockerfile 最佳实践：</p><ol><li>使用小基础镜像(例：alpine)</li><li>RUN 指令中最好把所有 shell 命令都放在一起执行，减少 Docker 层</li><li>分阶段构建</li><li>最好声明 Docker 镜像签名</li><li>使用.dockerignore 排除不需要加入 Docker 镜像目录或者文件</li></ol>
+          </div>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><code class="hljs go"># stage <span class="hljs-number">1</span><br>FROM node:<span class="hljs-number">13.1</span><span class="hljs-number">.0</span>-alpine as builder<br><br>LABEL version=<span class="hljs-string">&quot;node 13.1.0&quot;</span><br><br># 修改alpine源为阿里源，安装tzdata包并修改为北京时间<br>RUN sed -i <span class="hljs-string">&#x27;s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g&#x27;</span> /etc/apk/repositories \<br>    &amp;&amp; apk --update add --no-cache tzdata \<br>    &amp;&amp; cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime<br><br># 声明环境变量<br>ENV NODE_ENV dev<br><br># 声明使用node用户<br>USER node<br><br># 首次只加入<span class="hljs-keyword">package</span>.json文件，<span class="hljs-keyword">package</span>.json一般不变，这样就可以充分利用Docker Cache，节约安装node包时间<br>COPY --chown=node:node <span class="hljs-keyword">package</span>.json /app &amp;&amp; npm ci<br><br># 声明镜像默认位置<br>WORKDIR /app<br><br># 加入node代码<br>ADD --chown=node:node . /app<br><br># build代码<br>RUN npm run build \<br>    &amp;&amp; mv dist public<br><br># stage <span class="hljs-number">2</span><br># 加入nginx镜像<br>FROM nginx:alpine<br><br># 拷贝上阶段build静态文件<br>COPY --from=builder /app/public /app/public<br><br># 拷贝nginx配置文件<br>COPY nginx.conf /etc/nginx/conf.d/<span class="hljs-keyword">default</span>.conf<br><br># 声明容器端口<br>EXPOSE <span class="hljs-number">8080</span><br><br># 启动命令<br>CMD [<span class="hljs-string">&quot;nginx&quot;</span>,<span class="hljs-string">&quot;-g&quot;</span>,<span class="hljs-string">&quot;daemon off;&quot;</span>]<br></code></pre></td></tr></table></figure>
+
+<p>Docker 通过读取<code>Dockerfile</code>来自动构建 Docker 镜像。<code>Dockerfile</code>是一个文本文件用来描述用于组装构建 Docker 镜像的命令，通过<code>docker build . </code>命令完成对 Dockerfile 的构建执行操作从而生成约定产物，形成镜像制品。</p>
+<h1 id="1-Dockerfile-构建"><a href="#1-Dockerfile-构建" class="headerlink" title="1.Dockerfile 构建"></a>1.Dockerfile 构建</h1><h2 id="1-1-构建机制"><a href="#1-1-构建机制" class="headerlink" title="1.1 构建机制"></a>1.1 构建机制</h2><p>docker 构建一个镜像需要：<code>Dockerfile文件</code>、<code>构建所需的上下文</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker build .</span><br></code></pre></td></tr></table></figure>
+
+<p>这条命令中，docker-cli 会:</p>
+<ol>
+<li>把当前目录及子目录当做上下文传递给 docker 服务</li>
+<li>从当前目录(不包括子目录)中找到 Dockerfile</li>
+<li>检查 Dockerfile 的语法</li>
+<li>依次执行 Dockerfile 中的指令，根据指令生成中间过度镜像(存储在本地，为之后的指令或构建作缓存)</li>
+</ol>
+<p>注意：为了加快构建速度，减少传递给 docker 服务的文件数量，最好将 Dockerfile 放在单独的空目录中。如果目录中含有大量文件，可以使用<code>.dockerignore</code>来忽略构建时用不到的文件，例如：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"># comment<br>*/temp*<br>*<span class="hljs-comment">/*/temp*</span><br><span class="hljs-comment">temp?</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="1-2-镜像缓存机制"><a href="#1-2-镜像缓存机制" class="headerlink" title="1.2 镜像缓存机制"></a>1.2 镜像缓存机制</h2><p>当在构建或者下载镜像时候，当镜像层已经存在的时候则直接使用缓存， 不需要进行重新构建镜像，如果我们希望在构建镜像时不使用缓存，可以在 docker build 命令中加上<code>–no-cache</code>参数。如果我们改变 Dockerfile 指令的执行顺序，或者修改或添加指令，都会使缓存失效。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker build --no-cache=true ... # --no-cache：不使用缓存，每条指令都重新生成镜像<br></code></pre></td></tr></table></figure>
+
+<p>Dockerfile 在执行的时候，当有执行过相同的代码并且顺序也一致的情况下，就会使用缓存镜像层进行构建新的镜像。Dockerfile 中每一个指令都会创建一个镜像层，上层是依赖于下层的。</p>
+<div class="note note-warning">
+            <p>缓存失效：简单来说就是如果第 n 层有改动，则 n 层以后的缓存都会失效，大多数情况下判断有无改动的方法是判断这层的指令和缓存中的构建指令是否一致，但是对于 COPY 和 ADD 命令会计算镜像内的文件和构建目录文件的校验和然后做比较来判断本层是否有改动。</p>
+          </div>
+
+<h2 id="1-3-格式要求"><a href="#1-3-格式要求" class="headerlink" title="1.3 格式要求"></a>1.3 格式要求</h2><p>虽然 Dockerfile 并不区分大小写，但还是约定指令使用大写。<br>Dockerfile 的第一条可执行指令必须是 FROM。<br>以#开头的是注释，行内的#都被当做参数，并且不支持续行。</p>
+<h1 id="2-Dockerfile-指令"><a href="#2-Dockerfile-指令" class="headerlink" title="2.Dockerfile 指令"></a>2.Dockerfile 指令</h1><p>Dockerfile 是一个文本文件，其内包含了一条条的指令(Instruction)，每一条指令构建一层，因此每一条指令的内容，就是描述该层应当如何构建，常用的指令如下：</p>
+<h3 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h3><p><strong>用途：构建的镜像继承自某个 base image</strong>。FROM 指令必须是 Dockerfile 的第一个指令，可以使用多次来构建多个镜像，以最后一个镜像的 ID 为输出值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">FROM [--platform=&lt;platform&gt;] &lt;image&gt; [AS &lt;name&gt;]<br>FROM [--platform=&lt;platform&gt;] &lt;image&gt;[:&lt;tag&gt;] [AS &lt;name&gt;]<br>FROM [--platform=&lt;platform&gt;] &lt;image&gt;[@&lt;digest&gt;] [AS &lt;name&gt;]<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li><strong>platform：</strong>用于标识 Docker 镜像平台架构，例如：<code>linux/amd64</code>、<code>linux/arm64</code>或<code>windows/amd64</code></li>
+<li><strong>tag：</strong>镜像标签，默认为<code>latest</code>。如果无法找到该 tag 值，构建器将返回错误。</li>
+<li><strong>digest：</strong>可寻址标识符，镜像的二进制 ID，主要用于验证所下载镜像的<code>完整性</code>和<code>防篡改性</code>。</li>
+</ul>
+<h3 id="RUN"><a href="#RUN" class="headerlink" title="RUN"></a>RUN</h3><p><strong>用途：</strong>在镜像的构建过程中执行特定的命令，并生成一个中间镜像。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs go">RUN &lt;command&gt; # shell 格式<br>RUN [<span class="hljs-string">&quot;executable&quot;</span>, <span class="hljs-string">&quot;param1&quot;</span>, <span class="hljs-string">&quot;param2&quot;</span>]  # exec格式<br></code></pre></td></tr></table></figure>
+
+<p><strong>使用原则：</strong></p>
+<ul>
+<li>尽量减少一个 Dockerfile 中的 RUN 命令的个数。<strong>RUN 命令在构建时会创建一个新层，如非特殊的需要，建议一个 Dockerfile 在需要使用 RUN 命令的时候尽可能的只用一个 RUN 命令，将多条 RUN 命令进行合并可以有效降低构建的镜像的层数</strong>。</li>
+<li>使用&amp;&amp;连接多条命令，例如：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">RUN apt-get update &amp;&amp; apt-get install -y \<br>package-bar\<br>package-baz \<br>package-foo<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>避免复杂的逻辑实现</li>
+</ul>
+<p><strong>关于缓存失效：</strong></p>
+<div class="note note-warning">
+            <p> 在通常情况下，构建镜像后，所有的层都在 Docker 缓存中，假设后来又修改了其中的 apt-get install 命令，在添加一个包时， Docker 发现修改后的 RUN apt-get update 命令和之前的完全一样。<br>这时，不会执行 RUN apt-get update 命令，而是使用之前的缓存镜像。因为 RUN apt-get update 命令没有执行，后面的 apt-get install 命令安装的可能是过期的软件版本或提示没有可用源。<br>使用 RUN apt-get update &amp;&amp; apt-get install -y 命令可以确保 Dockerfiles 配置文件每次安装的都是包的最新版本，而且这个过程不需要进一步编码或额外干预 ，这项技术叫作缓存破坏( Cache Busting ）。</p>
+          </div>
+
+<h3 id="MAINTAINER-deprecated"><a href="#MAINTAINER-deprecated" class="headerlink" title="MAINTAINER (deprecated)"></a>MAINTAINER (deprecated)</h3><p>已废弃，使用 LABEL 命令代替。</p>
+<h3 id="ADD-amp-amp-COPY"><a href="#ADD-amp-amp-COPY" class="headerlink" title="ADD &amp;&amp; COPY"></a>ADD &amp;&amp; COPY</h3><p><strong>用途：</strong>ADD 和 COPY 命令都是在构建镜像时， <strong>将 src 路径复制新文件、目录或远程文件 URL，并将它们添加到图像的文件系统中 dest</strong>，但一般优先使用 COPY 命令，因为 ADD 命令比 COPY 命令更加透明。ADD 相较于 COPY 除了支持从本地复制文件到镜像，ADD 指令还支持通过 URL 从远程服务器读取资源并复制到镜像中。</p>
+<div class="note note-success">
+            <p>事实上当要从远程获取资源的时候推荐使用 RUN 命令：<code>RUN wget</code>或<code>RUN curl</code>，而 ADD 指令更擅长读取本地 tar 文件并解压缩 </p>
+          </div>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs go">ADD [--chown=&lt;user&gt;:&lt;group&gt;] &lt;src&gt;... &lt;dest&gt;<br>ADD [--chown=&lt;user&gt;:&lt;group&gt;] [<span class="hljs-string">&quot;&lt;src&gt;&quot;</span>,... <span class="hljs-string">&quot;&lt;dest&gt;&quot;</span>]<br><br>COPY [--chown=&lt;user&gt;:&lt;group&gt;] &lt;src&gt;... &lt;dest&gt;<br>COPY [--chown=&lt;user&gt;:&lt;group&gt;] [<span class="hljs-string">&quot;&lt;src&gt;&quot;</span>,... <span class="hljs-string">&quot;&lt;dest&gt;&quot;</span>]<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>**chown&#x3D;user:group **当执行 ADD、COPY 指令时源文件的各种元数据都会保留，比如读、写、执行权限、文件变更时间等，可以通过 <code>--chown=&lt;user&gt;:&lt;group&gt; </code>选项来改变文件的所属用户及所属组。</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go">ADD/COPY --chown=<span class="hljs-number">55</span>:mygroup files* /somedir/<br>ADD/COPY --chown=bin files* /somedir/<br>ADD/COPY --chown=<span class="hljs-number">1</span> files* /somedir/<br>ADD/COPY --chown=<span class="hljs-number">10</span>:<span class="hljs-number">11</span> files* /somedir/<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>src：</strong>拷贝源文件路径，src 可以使用通配符，将使用 Go 的 <a target="_blank" rel="noopener" href="https://pkg.go.dev/path/filepath#Match">filepath.Match</a> 规则匹配完成。例如：</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs go">ADD hom* /mydir/<br>ADD hom?.txt /mydir/<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>dest：</strong>拷贝到镜像的目标路径，可以是容器内的绝对路径，也可以是工作目录相对路径（工作目录可以用 WORKDIR 指定）。目标路径不需要事先创建，如果目录不存在会在复制文件前先行创建缺失目录。</li>
+</ul>
+<h3 id="CMD-amp-amp-ENTRYPOINT"><a href="#CMD-amp-amp-ENTRYPOINT" class="headerlink" title="CMD &amp;&amp; ENTRYPOINT"></a>CMD &amp;&amp; ENTRYPOINT</h3><p><strong>用途：</strong>CMD 命令和 ENTRYPOINT 命令部可以用于设置容器启动时要执行的命令， Dockerfile 置文件中 CMD 或 ENTRYPOINT 必须至少有其一。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs go">CMD [<span class="hljs-string">&quot;executable&quot;</span>,<span class="hljs-string">&quot;param1&quot;</span>,<span class="hljs-string">&quot;param2&quot;</span>]  # exec格式<br>CMD command param1 param2			  # shell格式<br>CMD [<span class="hljs-string">&quot;param1&quot;</span>,<span class="hljs-string">&quot;param2&quot;</span>]				  # exec参数，用来为ENTRYPOINT 提供参数<br><br>ENTRYPOINT [<span class="hljs-string">&quot;executable&quot;</span>, <span class="hljs-string">&quot;param1&quot;</span>, <span class="hljs-string">&quot;param2&quot;</span>] 	 # exec格式<br>ENTRYPOINT command param1 param2				 # shell格式<br>## 例如：<br>CMD java -jar demo.jar<br>CMD [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;demo.jar&quot;</span>]<br></code></pre></td></tr></table></figure>
+
+<p><strong>CMD 和 ENTRYPOINT 区别：</strong></p>
+<ul>
+<li>CMD 设置的命令能够被 docker run 命令后面的命令所覆盖，而 ENTRYPOINT 则不会。</li>
+</ul>
+<div class="note note-success">
+            <p>与 RUN 命令的区别：RUN 在构建的时候执行，并生成一个新的镜像，CMD、ENTRYPOINT 在容器运行的时候执行，在构建时不进行任何操作。</p>
+          </div>
+
+<h3 id="LABEL"><a href="#LABEL" class="headerlink" title="LABEL"></a>LABEL</h3><p><strong>用途：</strong>镜像打标签</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">LABEL &lt;key&gt;=&lt;value&gt; &lt;key&gt;=&lt;value&gt; &lt;key&gt;=&lt;value&gt; ...<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>如果 base image 中也有标签，则继承，如果是同名标签，则覆盖。</li>
+<li>为了减少图层数量，尽量将标签写在一个 LABEL 指令中去，如：</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs go">LABEL multi.label1=<span class="hljs-string">&quot;value1&quot;</span> \<br>      multi.label2=<span class="hljs-string">&quot;value2&quot;</span> \<br>      other=<span class="hljs-string">&quot;value3&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="EXPOSE"><a href="#EXPOSE" class="headerlink" title="EXPOSE"></a>EXPOSE</h3><p><strong>用途：</strong>为构建的镜像设置监听端口，使容器在运行时监听。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">EXPOSE &lt;port&gt; [&lt;port&gt;/&lt;protocol&gt;...]<br></code></pre></td></tr></table></figure>
+
+<div class="note note-warning">
+            <p>EXPOSE 指令并不会让容器监听 Host 的端口，如果需要，需要在 docker run 时使用-p 参数来发布容器端口到 Host 的某个端口上。</p>
+          </div>
+
+<h3 id="ENV"><a href="#ENV" class="headerlink" title="ENV"></a>ENV</h3><p><strong>用途：</strong>在构建的镜像中设置环境变量，在后续的 Dockerfile 指令中可以直接使用，也可以固化在镜像里，在容器运行时仍然有效。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs go">ENV &lt;key&gt; &lt;value&gt;<br>ENV &lt;key&gt;=&lt;value&gt; ...<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>ENV key value：把第一个空格之后的所有值都当做<key>的值，无法在一行内设定多个环境变量。</li>
+<li>ENV key&#x3D;value …：可以设置多个环境变量，如果<value>中存在空格，需要转义或用引号”括起来。</li>
+</ul>
+<div class="note note-success">
+            <p>可以在容器运行时指定环境变量，替换镜像中的已有变量，docker run –env key&#x3D;value<br>推荐使用在一行中写多个环境变量，减少图层</p>
+          </div>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs go">ENV myName=<span class="hljs-string">&quot;John Doe&quot;</span> \<br>    myDog=Rex\ The\ Dog \<br>    myCat=fluffy<br></code></pre></td></tr></table></figure>
+
+<h3 id="VOLUME"><a href="#VOLUME" class="headerlink" title="VOLUME"></a>VOLUME</h3><p><strong>用途：</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">VOLUME [<span class="hljs-string">&quot;/data&quot;</span>]<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<h3 id="WORKDIR"><a href="#WORKDIR" class="headerlink" title="WORKDIR"></a>WORKDIR</h3><p><strong>用途：</strong>为接下来的 Dockerfile 指令指定当前工作目录，可多次使用，如果使用的是相对路径，则相对的是上一个工作目录，类似 shell 中的 cd 命令。<br>影响的指令有：<code>RUN、CMD、ENTRYPOINT、COPY和ADD。</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">WORKDIR /path/to/workdir<br></code></pre></td></tr></table></figure>
+
+<div class="note note-warning">
+            <p>建议使用 WORKDIR 命令来代替类似于 RUN cd … &amp;&amp; do -something 等的命令，因为后者难以阅读维护</p>
+          </div>
+
+<h3 id="ARG"><a href="#ARG" class="headerlink" title="ARG"></a>ARG</h3><p><strong>用途： <strong>设置镜像构建时的环境变量，使用效果 ENV 一样。所不同的是，</strong>ARG 所设置环境变量生命周期仅在镜像构建期间</strong>，在将来容器运行时是不会存在这些环境变量的。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">ARG &lt;name&gt;[=&lt;<span class="hljs-keyword">default</span> value&gt;]<br></code></pre></td></tr></table></figure>
+
+<p><strong>使用方法：</strong><br>当 Dockerfile 指定 ARG 参数时可通过<code>docker build --build-arg &lt;varname&gt;=&lt;value&gt;</code>传入参数值进行覆盖。<br>docker 内置了一批构建参数，可以不用在 Dockerfile 中声明：<code>HTTP_PROXY、http_proxy、HTTPS_PROXY、https_proxy、FTP_PROXY、ftp_proxy、NO_PROXY、no_proxy</code></p>
+<h3 id="Volumn"><a href="#Volumn" class="headerlink" title="Volumn"></a>Volumn</h3><p><strong>用途：</strong>创建一个可以从<strong>本地主机</strong>或<strong>其它容器挂载</strong>的挂载点，用来保持数据不被销毁。Volume 可以在容器之间以及容器和主机之间共享和重用。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css">VOLUME <span class="hljs-selector-attr">[<span class="hljs-string">&quot;/data&quot;</span>]</span><br></code></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># 命令会将&quot;/data&quot;目录挂载到容器 ，开发人员可以在宿主机上直接操作该目录，</span><br><span class="hljs-comment"># 任何在该镜像&quot;/data&quot;目录中的文件都将被复制到 Volume中。</span><br>docker run -it --name container-test -h CONTAINER -v <span class="hljs-regexp">/data nginx /</span>bin/bash<br><span class="hljs-comment"># 可以找到容器与宿主机的挂载关系</span><br>docker inspect -f &#123;&#123;.Volumes&#125;&#125; container-test<br><span class="hljs-comment"># 在宿主机的目录下创建一个文件，然后进入容器的/data目录下会相应看到创建的文件</span><br>sudo touch <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>vfs<span class="hljs-regexp">/dir/</span>cde1671***<span class="hljs-number">37</span>a9/test-file<br><br></code></pre></td></tr></table></figure>
+
+<div class="note note-warning">
+            <p>和 Linux 不同，在 mac 上用 docker 会在 mac 上启动一个虚拟机运行 docker，因此 volume 创建的 directory 并不在你的 machine 上，而是在虚拟机中。</p>
+          </div>
+
+<h3 id="ONBUILD"><a href="#ONBUILD" class="headerlink" title="ONBUILD"></a>ONBUILD</h3><p><strong>用途：</strong>向镜像中添加一个触发器，当以该镜像为 base image 再次构建新的镜像时，会触发执行其中的指令。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ONBUILD</span><span class="hljs-meta"> [INSTRUCTION]</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>例如：</strong></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-comment"># 在下一次以此镜像为base image的构建中，执行ADD . /app/src，将项目代目添加到新镜像中去</span><br><span class="hljs-keyword">ONBUILD</span> <span class="hljs-keyword">ADD</span><span class="language-bash"> . /app/src</span><br></code></pre></td></tr></table></figure>
+
+<div class="note note-warning">
+            <p>ONBUILD 只会继承给子节点的镜像，不会再继承给孙子节点。<br>ONBUILD ONBUILD 或者 ONBUILD FROM 或者 ONBUILD MAINTAINER 是不允许的。</p>
+          </div>
+
+<h3 id="HEALTHCHECK"><a href="#HEALTHCHECK" class="headerlink" title="HEALTHCHECK"></a>HEALTHCHECK</h3><p><strong>用途：</strong>增加自定义的心跳检测功能，多次使用只有最后一次有效。格式：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">HEALTHCHECK</span><span class="language-bash"> [OPTION] CMD &lt;<span class="hljs-built_in">command</span>&gt;  <span class="hljs-comment"># 通过在容器内运行command来检查心跳</span></span><br><span class="hljs-keyword">HEALTHCHECK</span><span class="language-bash"> NONE                    <span class="hljs-comment"># 取消从base image继承来的心跳检测</span></span><br></code></pre></td></tr></table></figure>
+
+<p><strong>可选的 OPTION：</strong><br><code>--interval=DURATION：</code>检测间隔，默认 30 秒；<br><code>--timeout=DURATION：</code>命令超时时间，默认 30 秒；<br><code>--retries=N：</code>连续 N 次失败后标记为不健康，默认 3 次；<br><command>可以是 shell 脚本，也可以是 exec 格式的 json 数组。<br>docker 以<command>的退出状态码来区分容器是否健康，这一点同 shell 一致：</p>
+<ul>
+<li>0：命令返回成功，容器健康</li>
+<li>1：命令返回失败，容器不健康</li>
+<li>2：保留状态码，不要使用&#96;</li>
+</ul>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># 每5分钟检测本地网页是否可访问，超时设为3秒：</span><br>HEALTHCHECK --interval=<span class="hljs-number">5</span>m --timeout=<span class="hljs-number">3</span>s \<br>    CMD curl -f http:<span class="hljs-regexp">//</span>localhost/ || <span class="hljs-keyword">exit</span> <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="USER"><a href="#USER" class="headerlink" title="USER"></a>USER</h3><p>用途：指定运行容器时的用户名或 UID，后续的 RUN 也会使用指定用户。<strong>容器不推荐使用 root 权限。</strong></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs crmsh"><span class="hljs-keyword">USER</span> <span class="hljs-title">&lt;user</span>&gt;[:<span class="hljs-tag">&lt;group&gt;</span>]<br><span class="hljs-comment"># 声明使用node用户</span><br><span class="hljs-keyword">USER</span> <span class="hljs-title">node</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a target="_blank" rel="noopener" href="https://github.com/qianlei90/Blog/issues/35">https://github.com/qianlei90/Blog/issues/35</a><br><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000018222648">https://segmentfault.com/a/1190000018222648</a><br><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/builder/#dockerignore-file">https://docs.docker.com/engine/reference/builder/#dockerignore-file</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/vjD-JDw_2bYWa2InUfWHow">https://mp.weixin.qq.com/s/vjD-JDw_2bYWa2InUfWHow</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/ojZvxQTssqERueGahFGCbQ">https://mp.weixin.qq.com/s/ojZvxQTssqERueGahFGCbQ</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" class="category-chain-item">云原生</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/" class="category-chain-item">Docker容器技术</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E5%9F%BA%E7%A1%80/" class="category-chain-item">Docker基础</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Dockerfile/">#Dockerfile</a>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Docker镜像命令</div>
+      <div>https://kissy.wiki/2022/06/21/docker-file/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Jerry</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年6月21日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/06/21/notion-hexo-github/" title="使用Notion+Hexo+Github搭建技术博客">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">使用Notion+Hexo+Github搭建技术博客</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/06/15/undefined/" title="My-New-Post">
+                        <span class="hidden-mobile">My-New-Post</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'kissycn/hexo-comment');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
