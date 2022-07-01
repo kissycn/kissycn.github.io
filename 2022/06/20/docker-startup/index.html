@@ -1,0 +1,1135 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Jerry">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Docker的架构、Docker相关的Client、Deamon、Image、Container、Registry等介绍。还包含Docker在各个平台的安装使用等。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker入门基础">
+<meta property="og:url" content="https://kissy.wiki/2022/06/20/docker-startup/index.html">
+<meta property="og:site_name" content="Jerry 的技术博客">
+<meta property="og:description" content="Docker的架构、Docker相关的Client、Deamon、Image、Container、Registry等介绍。还包含Docker在各个平台的安装使用等。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kissy.wiki/yuque_images/header/docker-startup.png">
+<meta property="article:published_time" content="2022-06-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-01T02:24:10.112Z">
+<meta property="article:author" content="Jerry">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kissy.wiki/yuque_images/header/docker-startup.png">
+  
+  
+  
+  <title>Docker入门基础 - Jerry 的技术博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kissy.wiki","root":"/","version":"1.9.2","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":2},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":"ture","follow_dnt":true,"baidu":"75f8d971da6d372cc0c437d1ca828b7f","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?75f8d971da6d372cc0c437d1ca828b7f";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jerry的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Docker入门基础</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-20 00:00" pubdate>
+          2022年6月20日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          读完大约需要 15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="云原生"
+        id="heading-03eadd6d06506d54fb81026b2f5963c8" role="tab" data-toggle="collapse" href="#collapse-03eadd6d06506d54fb81026b2f5963c8"
+        aria-expanded="true"
+      >
+        云原生
+        <span class="list-group-count">(5)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-03eadd6d06506d54fb81026b2f5963c8"
+           role="tabpanel" aria-labelledby="heading-03eadd6d06506d54fb81026b2f5963c8">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(5)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="true"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="Docker入门基础"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="false"
+      >
+        Docker进阶
+        <span class="list-group-count">(2)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/04/docker-network/" title="Docker网络"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Docker网络</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(5)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="true"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="Docker入门基础"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="false"
+      >
+        Docker进阶
+        <span class="list-group-count">(2)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/04/docker-network/" title="Docker网络"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Docker网络</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="true"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="Docker入门基础"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Docker入门基础</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h1><p>一个“容器”，实际上是一个由 <code>Linux Namespace</code>、<code>Linux Cgroups </code>和 <code>rootfs</code>三种技术构建出来的进程的隔离环境。一个正在运行的 Linux 容器，其实可以被“一分为二”地看待：</p>
+<ul>
+<li>一组联合挂载在 <code>/var/lib/docker/aufs/mnt</code> 上的 rootfs，这一部分我们称为“容器镜像”（Container Image），是容器的静态视图；</li>
+<li>一个由<code>Namespace+Cgroups</code>构成的隔离环境，这一部分我们称为“容器运行时”（Container Runtime），是容器的动态视图。</li>
+</ul>
+<div class="note note-success">
+            <p>关于容器背景的几个知识点：</p><ul><li>容器技术的兴起源于 PaaS 技术的普及；</li><li>Docker 公司发布的 Docker 项目具有里程碑式的意义，Docker 项目通过“容器镜像”，解决了应用打包这个根本性难题。</li><li>容器本身没有价值，有价值的是“容器编排”。</li></ul>
+          </div>
+
+<h1 id="2-Docker-安装"><a href="#2-Docker-安装" class="headerlink" title="2. Docker 安装"></a>2. Docker 安装</h1><p>Docker 安装非常方便，支持 Ubuntu、RHEL、CentOS、Debian 等 Linux 发行版，同时也可以在 OSX 、Microsoft Windows 等非 Linux 平台下安装使用。<br>各平台安装情况参见官网：<a target="_blank" rel="noopener" href="https://docs.docker.com/desktop/mac/install/">Mac</a>、<a target="_blank" rel="noopener" href="https://docs.docker.com/desktop/windows/install/">Windows</a>、<a target="_blank" rel="noopener" href="https://docs.docker.com/desktop/linux/install/">Linux</a><br>本文以 Centos7.x 安装任意版本为例。<br><strong>步骤一、卸载原有平台</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">yum remove docker\</span><br><span class="language-bash">           docker-client\</span><br><span class="language-bash">           docker-client-latest\</span><br><span class="language-bash">           docker-common\</span><br><span class="language-bash">           docker-latest\</span><br><span class="language-bash">           docker-latest-logrotate\</span><br><span class="language-bash">           docker-logrotate\</span><br><span class="language-bash">           docker-engine</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤二、安装 Docker</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">安装yum源工具包</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">yum -y install yum-utils</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">添加Docker源</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">yum-config-manager\</span><br><span class="language-bash"> --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br></code></pre></td></tr></table></figure>
+
+<p>大多数情况下，可以直接安装最新版本的 Docker ，因为最新版本的 Docker 有着更好的稳定性和安全性。但是有时候需要与其他生态软件进行兼容或者其他原有需要按照制定版本 Docker 时就需要进行选择性安装了，例如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">直接安装最新版本</span><br>yum install docker-ce docker-ce-cli containerd.io<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">展示各个版本Docker</span><br>yum list docker-ce --showduplicates | sort -r<br><span class="hljs-meta prompt_"># </span><span class="language-bash">安装制定版本Docker</span><br>yum install docker-ce-&lt;VERSION_STRING&gt; docker-ce-cli-&lt;VERSION_STRING&gt; containerd.io<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤三、启动并运行测试容器</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">启动容器</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">systemctl start docker</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">查看运行状态</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">systemctl status docker</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">运行测试容器</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run hello-world</span><br>docker run hello-world<br>Unable to find image &#x27;hello-world:latest&#x27; locally<br>latest: Pulling from library/hello-world<br>2db29710123e: Pull complete<br>Digest: sha256:13e367d31ae85359f42d637adf6da428f76d75dc9afeb3c21faea0d976f5c651<br>Status: Downloaded newer image for hello-world:latest<br><br>Hello from Docker!<br>...<br></code></pre></td></tr></table></figure>
+
+<h1 id="3-Docker-组件"><a href="#3-Docker-组件" class="headerlink" title="3. Docker 组件"></a>3. Docker 组件</h1><h2 id="3-1-Docker-五大组件"><a href="#3-1-Docker-五大组件" class="headerlink" title="3.1 Docker 五大组件"></a>3.1 Docker 五大组件</h2><p>如下所示，Docker 一共包含了：<code>DockerClient</code>、<code>Deamon</code>、<code>Images</code>、<code>Containers</code>、<code>Registry</code>等五大组件。<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FqLhkrp10MdxxXrVSrOcYtdkYmBm.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="3-1-1-DockerClient"><a href="#3-1-1-DockerClient" class="headerlink" title="3.1.1 DockerClient"></a>3.1.1 DockerClient</h3><p><code>docker client</code> 是 docker 架构中用户用来和<code>docker daemon</code>建立通信的客户端，用户使用的可执行文件为 docker，通过 docker 命令行工具可以发起众多管理 container 的请求。</p>
+<p>docker client 可以通过一下三种方式和 docker daemon 建立通信：<br><code>tcp://host:port</code>、<code>unix:path_to_socket</code>、<code>fd://socketfd</code> docker client 可以通过设置命令行 flag 参数的形式设置安全传输层协议(TLS)的有关参数，保证传输的安全性。</p>
+<p>docker client 发送容器管理请求后，由 docker daemon 接受并处理请求，当 docker client 接收到返回的请求相应并简单处理后，docker client 一次完整的生命周期就结束了，当需要继续发送容器管理请求时，用户必须再次通过 docker 可以执行文件创建 docker client。</p>
+<h3 id="3-1-2-Docker-Deamon"><a href="#3-1-2-Docker-Deamon" class="headerlink" title="3.1.2 Docker Deamon"></a>3.1.2 Docker Deamon</h3><p>Docker Daemon（守护进程）作为 Docker 架构中的主体部分，常处于后台的系统进程中用于提供 Docker Server 功能，接收并处理 Docker Client 的请求。</p>
+<p>Docker Daemon 是 Docker 架构中运行在后台的守护进程，大致可以分为<code>Docker Server</code>、<code>Docker Engine</code>、<code>Job</code>。Docker Daemon 可以认为是通过 Docker Server 模块接受 Docker Client 的请求，并在 Engine 中处理请求，然后根据请求类型，创建出指定的 Job 并运行。<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FveTbUQwETU-2THuur9IPJ-i41qe.png" srcset="/img/loading.gif" lazyload><br>● Docker Server<br>相当于 C&#x2F;S 架构的服务器端，既可以是本地的，也可以是远程的作用是接收并分发 Docker Client 发起的请求。在其内部实现是由 Server 接受来自 Client 的请求，并创建一个 Goroutine 处理请求。</p>
+<ul>
+<li><strong>Docker Engine</strong></li>
+</ul>
+<p>Docker 架构中的运行引擎，同时是 Docker 运行的核心模块。它扮演 Docker Container 的角色，并且通过执行 Job 的方式来操纵和管理这些容器，每项工作都是以一个 Job 的形式存在的。</p>
+<ul>
+<li><strong>Job</strong></li>
+</ul>
+<p>一个 Job 可以被认为是 Docker 架构中 Engine 内部最基本的工作执行单元 ，Docker 做的每项工作都可以抽象为一个 Job 。例如，在容器内部运行一个进程是一个 Job ，创建一个新的容器是 Job，Docke Server 的运行过程也是一个 Job。</p>
+<h3 id="3-1-3-Images"><a href="#3-1-3-Images" class="headerlink" title="3.1.3 Images"></a>3.1.3 Images</h3><p>简单地理解，Docker 镜像就是一个 Linux 的文件系统（Root FileSystem），这个文件系统里面包含可以运行在 Linux 内核的程序以及相应的数据。</p>
+<div class="note note-success">
+            <p>一般而言， Linux 分为两个部分：Linux 内核（Linux Kernel）与用户空间，而真正的 Linux 操作系统，是指 Linux 内核，我们常用的 Ubuntu、CentOS 等操作系统其实是不同厂商在 Linux 内核基础上添加自己的软件与工具集（tools）形成的发布版本（Linux Distribution）。</p><p>因此，我们也可以把镜像看成是上面所说的用户空间，当 Docker 通过镜像创建一个容器时，就是将镜像定义好的用户空间作为独立隔离的进程运行在宿主机的 Linux 内核之上。</p>
+          </div>
+
+<p>这里要强调一下镜像的两个特征：</p>
+<ul>
+<li><strong>镜像是分层（Layer）的：</strong>即一个镜像可以多个中间层组成，多个镜像可以共享同一中间层，我们也可以通过在镜像添加多一层来生成一个新的镜像。</li>
+<li><strong>镜像是只读的（read-only）：</strong>镜像在构建完成之后，便不可以再修改，而上面我们所说的添加一层构建新的镜像，这中间实际是通过创建一个临时的容器，在容器上增加或删除文件，从而形成新的镜像，因为容器是可以动态改变的。</li>
+</ul>
+<p><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FrWYT83vgb0zaKf0LUBZdbpfydPE.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="3-1-4-Containers"><a href="#3-1-4-Containers" class="headerlink" title="3.1.4 Containers"></a>3.1.4 Containers</h3><p>容器与镜像的关系，就如同面向编程中对象与类之间的关系。</p>
+<p>因为容器是通过镜像来创建的，所以必须先有镜像才能创建容器，而生成的容器是一个独立于宿主机的隔离进程，并且有属于容器自己的网络和命名空间。</p>
+<p>我们前面介绍过，<strong>镜像由多个中间层（layer）组成，生成的镜像是只读的，但容器却是可读可写的，这是因为容器是在镜像上面添一层读写层（writer&#x2F;read layer）来实现的</strong>，如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FtBUiM6gDYUaT4dsEf0lWgdCtbSg.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="3-1-5-Registry"><a href="#3-1-5-Registry" class="headerlink" title="3.1.5 Registry"></a>3.1.5 Registry</h3><p>仓库（Repository）是集中存储镜像的地方，这里有个概念要区分一下，那就是仓库与仓库服务器(Registry)是两回事，像我们上面说的 Docker Hub，就是 Docker 官方提供的一个仓库服务器，不过其实有时候我们不太需要太过区分这两个概念。</p>
+<ul>
+<li><strong>公共仓库</strong></li>
+</ul>
+<p>公共仓库一般是指 Docker Hub，前面我们已经多次介绍如何从 Docker Hub 获取镜像，除了获取镜像外，我们也可以将自己构建的镜像存放到 Docker Hub，这样，别人也可以使用我们构建的镜像。</p>
+<ul>
+<li><strong>私有仓库</strong></li>
+</ul>
+<p>虽然 Docker 官方提供了公共的镜像仓库，但是从安全和效率等方面考虑，部署我们私有环境内的 Registry 也是非常必要的。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/goharbor/harbor">Harbor</a>是由 VMware 公司开源的企业级的 Docker Registry 管理项目，相比 docker 官方拥有更丰富的权限权利和完善的架构设计，适用大规模 docker 集群部署提供仓库服务。<br>它主要提供 Dcoker Registry 管理界面 UI，可基于角色访问控制,镜像复制， AD&#x2F;LDAP 集成，日志审核等功能，完全的支持中文。</p>
+<h2 id="3-2-Docker"><a href="#3-2-Docker" class="headerlink" title="3.2 Docker"></a>3.2 Docker</h2><p><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FkAvpjBkuMyj4_cjwT5Jkg9wxio1.png" srcset="/img/loading.gif" lazyload><br>除了 Docker Engine 外，还有 <code>Network Container</code>、 <code>Image</code>、<code>Data Volumes</code>、<code>Container</code>、 <code>Image</code>，下面重点介绍 Network、Data Volumes</p>
+<ul>
+<li><strong>Network：</strong>不仅可以很方便地维护和管理 Docker 网络，还可以很方便地在容器之间通过 IP 址和端口进行交互。</li>
+<li><strong>Data Volumes：</strong>可以视为容器中的一种特殊的文件路径，用于保存与容器实例生命周期无关的共享数据，它可以存放在一个或多个容器内特定的目录下，提供独立于容器的持久化存储。</li>
+</ul>
+<p>Data Volumes 是经过特殊设计的目录，可以绕过 UnionFS ( Union File System，联合文件系统 ），为一个或多个容器提供访问，从而实现容器间的数据共享，它有如下几个特性：</p>
+<ol>
+<li>在容器创建时初始化</li>
+<li>作为文件系统的一部分，但是不受 UnionFS 的管理</li>
+<li>便于持久化存储数据和共享数据。</li>
+<li>Data Volumes 的数据是持久化的，删除容器不影响 Data Volumes 的数据。</li>
+<li>对 Data Volumes 的操作会立刻生效</li>
+</ol>
+<h1 id="4-Docker-容器技术原理"><a href="#4-Docker-容器技术原理" class="headerlink" title="4. Docker 容器技术原理"></a>4. Docker 容器技术原理</h1><h2 id="4-1-chroot"><a href="#4-1-chroot" class="headerlink" title="4.1 chroot"></a>4.1 chroot</h2><p>提起容器就不得不说<code>chroot</code>，因为<code>chroot</code>是最早的容器雏形。<code>chroot</code>意味着切换根目录，有了<code>chroot</code>就意味着我们可以把任何目录更改为当前进程的根目录，这与容器非常相似。</p>
+<div class="note note-info">
+            <p><code>chroot</code>是在 Unix 和 Linux 系统的一个操作，针对正在运作的软件行程和它的子进程，改变它外显的根目录。一个运行在这个环境下，经由<code>chroot</code>设置根目录的程序，它不能够对这个指定根目录之外的文件进行访问动作，不能读取，也不能更改它的内容。</p>
+          </div>
+<p>简单来说就是，<strong>chroot 就是可以改变某进程的根目录，使这个程序不能访问目录之外的其他目录。</strong><br>chroot 示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">步骤一：</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在当前命令常见一个rootfs目录</span><br>mkdir -p /home/rootfs<br><span class="hljs-meta prompt_"># </span><span class="language-bash">为了方便演示，使用现成的 busybox 镜像来创建一个系统</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">该命令用于创建一个busybox的容器，并将之导出到当前目录</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">这样做的目的时为了得到一个可运行的操作系统目录文件</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker <span class="hljs-built_in">export</span> $(docker create busybox) -o busybox.tar</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">tar -xf busybox.tar</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span></span><br>bin  busybox.tar  dev  etc  home  proc  root  sys  tmp  usr  var<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">步骤二：</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在 rootfs 目录下初始化了一些目录，下面让我们通过一条命令来见证 <span class="hljs-built_in">chroot</span> 的神奇之处。</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">使用以下命令，可以启动一个 sh 进程，并且把 /home/centos/rootfs 作为 sh 进程的根目录。</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">chroot</span> /home/rootfs /bin/sh</span><br>/ #<br><span class="hljs-meta prompt_"># </span><span class="language-bash">此时，我们的命令行窗口已经处于上述命令启动的 sh 进程中。</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在当前sh命令行窗口下，我们使用<span class="hljs-built_in">ls</span>命令查看一下当前进程，看是否真的与主机上的其他目录隔离开了</span><br>/ # /bin/ls /<br>bin  busybox.tar  dev  etc  home  proc  root  sys  tmp  usr  var<br></code></pre></td></tr></table></figure>
+
+<p>这里可以看到：<code>当前进程的根目录</code>已经变成了主机上的<code>/home/rootfs</code> 目录。这样就实现了当前进程与主机的隔离。到此为止，一个目录隔离的容器就完成了。<br>到目前为止使用了 chroot 完成了对资源目录的隔离，但是还不能完整的称之为时一个容器，因为他的进程网络等信息还未隔离，要实现一个完整的容器还需要依靠 Linux 的其他三项技术： <strong>Namespace</strong>、<strong>Cgroups</strong> 和<strong>UnionFS</strong></p>
+<h2 id="4-2-Namespace"><a href="#4-2-Namespace" class="headerlink" title="4.2 Namespace"></a>4.2 Namespace</h2><p>Namespace 是 Linux 内核的一项功能，该功能对内核资源进行隔离，使得容器中的进程都可以在单独的命名空间中运行，并且只可以访问当前容器命名空间的资源。Namespace 可以隔离进程 ID、主机名、用户 ID、文件名网络访问和进程间通信等相关资源。Docker 主要用到以下五种命名空间：</p>
+<ul>
+<li><strong>pid namespace</strong>：用于隔离进程 ID。</li>
+<li><strong>net namespace</strong>：隔离网络接口，在虚拟的<code>net namespace</code>内用户可以拥有自己独立的<code>IP</code>、<code>路由</code> 、<code>端口</code>等。</li>
+<li><strong>mnt namespace</strong>：文件系统挂载点隔离。</li>
+<li><strong>ipc namespace</strong>：信号量, 消息队列和共享内存的隔离。</li>
+<li><strong>uts namespace</strong>：主机名和域名的隔离。</li>
+</ul>
+<h2 id="4-3-Cgroups"><a href="#4-3-Cgroups" class="headerlink" title="4.3 Cgroups"></a>4.3 Cgroups</h2><p>Cgroups 是一种 Linux 内核功能，可以限制和隔离进程的资源使用情况（CPU、内存、磁盘 I&#x2F;O、网络等）。在容器的实现中，Cgroups 通常用来限制容器的 CPU 和内存等资源的使用。</p>
+<h2 id="4-4-联合文件系统"><a href="#4-4-联合文件系统" class="headerlink" title="4.4 联合文件系统"></a>4.4 联合文件系统</h2><p>联合文件系统，又叫 UnionFS，是一种通过创建文件层进程操作的文件系统，因此，联合文件系统非常<br>轻快。Docker 使用联合文件系统为容器提供构建层，使得容器可以实现写时复制以及镜像的分层构建<br>和存储。常用的联合文件系统有：<strong>AUFS</strong>、<strong>Overlay</strong> 和 <strong>Devicemapper</strong> 等。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a target="_blank" rel="noopener" href="http://dockone.io/article/9249">http://dockone.io/article/9249</a><br><a target="_blank" rel="noopener" href="https://i4t.com/4248.html">https://i4t.com/4248.html</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" class="category-chain-item">云原生</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/" class="category-chain-item">Docker容器技术</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E5%9F%BA%E7%A1%80/" class="category-chain-item">Docker基础</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Docker入门基础</div>
+      <div>https://kissy.wiki/2022/06/20/docker-startup/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Jerry</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年6月20日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/06/21/docker-file/" title="Dockerfile镜像指令">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Dockerfile镜像指令</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/06/15/undefined/" title="My-New-Post">
+                        <span class="hidden-mobile">My-New-Post</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'kissycn/hexo-comment');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
