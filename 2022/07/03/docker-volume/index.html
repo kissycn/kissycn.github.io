@@ -1,0 +1,1135 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Jerry">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Dockerfile Volumn 实现原理以及创建使用、查看、删除等操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="五、Docker Volume使用与原理">
+<meta property="og:url" content="https://kissy.wiki/2022/07/03/docker-volume/index.html">
+<meta property="og:site_name" content="Jerry 的技术博客">
+<meta property="og:description" content="Dockerfile Volumn 实现原理以及创建使用、查看、删除等操作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
+<meta property="article:published_time" content="2022-07-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-03T09:47:18.371Z">
+<meta property="article:author" content="Jerry">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="DockerVolume">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
+  
+  
+  
+  <title>五、Docker Volume使用与原理 - Jerry 的技术博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kissy.wiki","root":"/","version":"1.9.2","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":2},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":"ture","follow_dnt":true,"baidu":"75f8d971da6d372cc0c437d1ca828b7f","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?75f8d971da6d372cc0c437d1ca828b7f";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jerry的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">五、Docker Volume使用与原理</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-07-03 00:00" pubdate>
+          2022年7月3日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          读完大约需要 13 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="云原生"
+        id="heading-03eadd6d06506d54fb81026b2f5963c8" role="tab" data-toggle="collapse" href="#collapse-03eadd6d06506d54fb81026b2f5963c8"
+        aria-expanded="true"
+      >
+        云原生
+        <span class="list-group-count">(6)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-03eadd6d06506d54fb81026b2f5963c8"
+           role="tabpanel" aria-labelledby="heading-03eadd6d06506d54fb81026b2f5963c8">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(6)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="false"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="一、Docker入门基础"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">一、Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="二、Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">二、Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="三、DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">三、DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="true"
+      >
+        Docker进阶
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">四、Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">五、Docker Volume使用与原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">五、Docker网络</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(6)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="false"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="一、Docker入门基础"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">一、Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="二、Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">二、Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="三、DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">三、DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="true"
+      >
+        Docker进阶
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">四、Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">五、Docker Volume使用与原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">五、Docker网络</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="true"
+      >
+        Docker进阶
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">四、Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">五、Docker Volume使用与原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">五、Docker网络</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">五、Docker Volume使用与原理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h1><p>容器按照业务类型，总体可以分为两类：</p>
+<ul>
+<li>无状态的（数据不需要被持久化）</li>
+<li>有状态的（数据需要被持久化）</li>
+</ul>
+<p>在实际业务总是有各种需要数据持久化的场景，比如 MySQL、Kafka 等有状态的业务。因此为了解决有状态业务的需求，Docker 提出了卷（Volume）的概念。<br>什么是卷？<strong>卷的本质是文件或者目录，它可以绕过默认的联合文件系统，直接以文件或目录的形式存在于宿主机上。</strong><br>卷的概念不仅解决了数据持久化的问题，还解决了容器间共享数据的问题。<strong>使用卷可以将容器内的目录或文件持久化，当容器重启后保证数据不丢失</strong>。例如我们可以使用卷将 MySQL 的目录持久化，实现容器重启数据库数据不丢失。<br>Docker 提供了卷（Volume）的功能，使用 docker volume 命令可以实现对卷的创建、查看和删除等操作。下面我们来详细了解一下这些命令。</p>
+<h1 id="2-Docker-Volume-操作"><a href="#2-Docker-Volume-操作" class="headerlink" title="2. Docker Volume 操作"></a>2. Docker Volume 操作</h1><h2 id="2-1-Volume-创建和使用"><a href="#2-1-Volume-创建和使用" class="headerlink" title="2.1 Volume 创建和使用"></a>2.1 Volume 创建和使用</h2><p><strong>创建容器卷：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create [OPTIONS] [VOLUME]</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>OPTIONS 说明：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">--driver , -d	:设置卷driver名称 (默认值：local，该卷只能本机的容器访问，若要实现远程访问需要使用网络存储)<br>--label		:卷标签<br>--name		:卷名称<br>--opt , -o :用于设置driver的详细参数<br></code></pre></td></tr></table></figure>
+
+<p><strong>示例：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">创建卷</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create hello</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">创建带参数的卷，使用网络driver</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create --driver <span class="hljs-built_in">local</span> \</span><br><span class="language-bash">    --opt <span class="hljs-built_in">type</span>=nfs \</span><br><span class="language-bash">    --opt o=addr=192.168.1.1,rw \</span><br><span class="language-bash">    --opt device=:/path/to/dir \</span><br><span class="language-bash">    foo</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">卷使用有几种方式可以通过docker run -v进行挂载，也可以通过--mount进行挂载</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="2-2-Volume-使用"><a href="#2-2-Volume-使用" class="headerlink" title="2.2 Volume 使用"></a>2.2 Volume 使用</h2><p>Volume 的与容器挂载的方式有如下几种：<br><strong>1、docker -v 挂载</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">-v, --volume=[host-src:]container-dest[:&lt;options&gt;]: 将宿主机src目录挂载到容器的dest.<br></code></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">在宿主机上创建一个临时目录/var/lib/docker/volumes/[VOLUME_ID]/_data，</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">然后把它挂载到容器的/test目录上</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /test</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">Docker 就直接把宿主机的/home目录挂载到容器的/test目录上</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /home:/test</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2、自动创建挂载</strong><br>当使用<code>docker -v</code>的方式指定容器持久化路径<code>src</code>参数为空时，Docker 会自动为我们创建卷，并且绑定到容器中，使用命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=nginx-volume -v /usr/share/nginx/html nginx</span><br></code></pre></td></tr></table></figure>
+
+<p>使用以上命令，我们启动了一个 nginx 容器， -v 参数使得 Docker 自动生成一个卷并且绑定到容器的<br>&#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html 目录中。我们可以使用<code>docker volume ls</code>命令来查看下主机上的卷。</p>
+<p><strong>3、使用创建好的 volume 挂载</strong><br>使用<code>docker volume create</code>命令创建一个数据卷，在使用<code>docker -v</code> 进行挂载：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create hello</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">将容器卷hello挂载到nginx容器的/usr/share/nginx/html目录下</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=nginx -v hello:/usr/share/nginx/html nginx</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>4、使用 mount 进行挂载</strong><br>使用 docker volume 创建的卷在容器启动时，添加 –mount 参数指定卷的名称即可使用。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=nginx --mount <span class="hljs-built_in">source</span>=myvolume,target=/usr/share/nginx/html nginx</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>volume 共享使用示例：</strong><br>为了演示 Volume 的共享示例，我们可以创建两个容器，然后挂载到一个 volume 上，通过修改一个 volume 数据查看另外一个数据卷数据变更情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">创建volume</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create datas</span><br>datas<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">创建两个用于测试的volume，挂载自同一个容器卷：datas</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=nginx1 -v datas:/usr/share/nginx/html nginx</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=nginx2 -v datas:/usr/share/nginx/html nginx</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">创建成功进入容器</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker ps -a</span><br>CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS          PORTS     NAMES<br>fc840491c92c   nginx     &quot;/docker-entrypoint.…&quot;   3 seconds ago    Up 2 seconds    80/tcp    nginx2<br>5dfe59611f13   nginx     &quot;/docker-entrypoint.…&quot;   9 seconds ago    Up 8 seconds    80/tcp    nginx1<br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker <span class="hljs-built_in">exec</span> -it fc840491c92c /bin/bash</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">进入刚刚进行挂载的目标目录，复制一个同样的文件</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cd</span> /usr/share/nginx/html</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span></span><br>50x.html  index.html<br><span class="hljs-meta prompt_">$</span><span class="language-bash"><span class="hljs-built_in">cp</span> -r index.html index.html.bak</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">进入另外一个容器查看文件变更情况</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker <span class="hljs-built_in">exec</span> -it 5dfe59611f13 /bin/bash</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">可以看到文件变更信息已经同步</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> /usr/share/nginx/html</span><br>50x.html  index.html  index.html.bak<br></code></pre></td></tr></table></figure>
+
+<h2 id="2-2-Volume-查看"><a href="#2-2-Volume-查看" class="headerlink" title="2.2 Volume 查看"></a>2.2 Volume 查看</h2><p>Docker Volume 提供了<code>docker volume ls</code>和<code>docker volume inspect </code>两种查看 volume 的指令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">查看容器卷列表</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume <span class="hljs-built_in">ls</span> [OPTIONS]</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">查看某个容器详情</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume inspect [OPTIONS] VOLUME [VOLUME...]</span><br></code></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume <span class="hljs-built_in">ls</span></span><br>DRIVER    VOLUME NAME<br>local     datas<br>local     hello<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume inspect datas</span><br>[<br>    &#123;<br>        &quot;CreatedAt&quot;: &quot;2022-07-02T10:52:53-04:00&quot;,<br>        &quot;Driver&quot;: &quot;local&quot;,<br>        &quot;Labels&quot;: &#123;&#125;,<br>        &quot;Mountpoint&quot;: &quot;/var/lib/docker/volumes/datas/_data&quot;,<br>        &quot;Name&quot;: &quot;datas&quot;,<br>        &quot;Options&quot;: &#123;&#125;,<br>        &quot;Scope&quot;: &quot;local&quot;<br>    &#125;<br>]<br></code></pre></td></tr></table></figure>
+
+<h2 id="2-3-Volume-删除"><a href="#2-3-Volume-删除" class="headerlink" title="2.3 Volume 删除"></a>2.3 Volume 删除</h2><p>Docker Volume 提供了<code>docker volume rm</code> 和 <code>docker volume prune</code>指令用于删除容器卷。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">用于删除未使用的卷</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume prune [OPTIONS]</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">用于删除一个或多个指定卷</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume <span class="hljs-built_in">rm</span> [OPTIONS] VOLUME [VOLUME...]</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>示例：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">删除名为hello的容器卷</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume <span class="hljs-built_in">rm</span> hello</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">删除所有未使用的卷</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create <span class="hljs-built_in">test</span></span><br>test<br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume prune</span><br>WARNING! This will remove all local volumes not used by at least one container.<br>Are you sure you want to continue? [y/N] y<br>Deleted Volumes:<br>test<br><br>Total reclaimed space: 0B<br></code></pre></td></tr></table></figure>
+
+<h1 id="3-容器间数据共享"><a href="#3-容器间数据共享" class="headerlink" title="3. 容器间数据共享"></a>3. 容器间数据共享</h1><p>实现容器间数据共享可以通过：生产者–消费者 模式完成，例如：新建一个存储卷，将两个新启动的容器挂载到同一个容器卷上边，然后通过生产者向容器卷写入数据，观察消费者数据变化情况。<br><strong>步骤一：创建容器卷</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create log-vol</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤二：挂载生产者-消费者容器卷</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run --mount <span class="hljs-built_in">source</span>=log-vol,target=/tmp/log --name=log-producer -it busybox</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run --mount <span class="hljs-built_in">source</span>=log-vol,target=/tmp/log --name=log-consumer -it busybox</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤三：往生产者挂载目录写入数据观察消费者情况</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">往log-producer容器写入数据</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hello, My log.&quot;</span> &gt;&gt;/tmp/log/mylog.log</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在log-consumer查看上面写入的数据</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> /tmp/log/mylog.log</span><br>Hello, My log.<br></code></pre></td></tr></table></figure>
+
+<h1 id="4-主机与容器间数据共享"><a href="#4-主机与容器间数据共享" class="headerlink" title="4. 主机与容器间数据共享"></a>4. 主机与容器间数据共享</h1><p>Docker 卷的目录默认在 &#x2F;var&#x2F;lib&#x2F;docker 下，当我们想把主机的其他目录映射到容器内时，就需要用到主机与容器之间数据共享的方式了，例如我想把 MySQL 容器中的 &#x2F;var&#x2F;lib&#x2F;mysql 目录映射到主机的&#x2F;var&#x2F;lib&#x2F;mysql 目录中，我们就可以使用主机与容器之间数据共享的方式来实现。<br>要实现容器与宿主机间文件共享非常简单，只需要将<code>docker -v</code>的<code>src参数</code>设置为宿主机的目录即可：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">-v, --volume=[host-src:]container-dest[:&lt;options&gt;]: 将宿主机src目录挂载到容器的dest.<br></code></pre></td></tr></table></figure>
+
+<p>例如：将主机的<code>/data</code>目录挂载到容器中的<code>/usr/local/data</code>中</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /data:/usr/local/data -it busybox</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在容器中写入数据到<span class="hljs-built_in">log</span>文件,并退出容器查看宿主机的数据写入情况</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hello, My log.&quot;</span> &gt;&gt;mylog.log</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">exit</span></span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在宿主机查看日志变化情况</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> /data/mylog.log</span><br>Hello, My log.<br></code></pre></td></tr></table></figure>
+
+<h1 id="5-Docker-卷实现原理"><a href="#5-Docker-卷实现原理" class="headerlink" title="5. Docker 卷实现原理"></a>5. Docker 卷实现原理</h1><p>在了解 Docker 卷的原理之前，我们先来回顾一下镜像和容器的文件系统原理。</p>
+<div class="note note-success">
+            <p>镜像和容器的文件系统原理： 镜像是由多层文件系统组成的，当我们想要启动一个容器时，Docker 会在镜像上层创建一个可读写层，容器中的文件都工作在这个读写层中，当容器删除时，与容器相关的工作文件将全部丢失。</p>
+          </div>
+<p>Docker 容器的文件系统不是一个真正的文件系统，而是通过联合文件系统实现的一个伪文件系统，而<strong>Docker 卷则是直接利用主机的某个文件或者目录，它可以绕过联合文件系统，直接挂载主机上的文件或目录到容器中</strong>，这就是它的工作原理。</p>
+<p>在我们创建 Docker 卷时，Docker 会把卷的数据全部放在 &#x2F;var&#x2F;lib&#x2F;docker&#x2F;volumes 目录下，并且在每个对应的卷的目录下创建一个 _data 目录，然后把 _data 目录绑定到容器中。因此我们在容器中挂载卷的目录下操作文件，实际上是在操作主机上的 _data 目录。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">打开该目录可以看到刚刚创建的volume文件</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> /var/lib/docker/volumes</span><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/volume_create/">https://docs.docker.com/engine/reference/commandline/volume_create&#x2F;</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" class="category-chain-item">云原生</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/" class="category-chain-item">Docker容器技术</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="category-chain-item">Docker进阶</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+        <a href="/tags/DockerVolume/">#DockerVolume</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>五、Docker Volume使用与原理</div>
+      <div>https://kissy.wiki/2022/07/03/docker-volume/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Jerry</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年7月3日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/07/05/docker-network/" title="五、Docker网络">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">五、Docker网络</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理">
+                        <span class="hidden-mobile">四、Docker核心技术原理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'kissycn/hexo-comment');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
