@@ -16,25 +16,24 @@
   <meta name="author" content="Jerry">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Dockerfile的使用机器注意事项">
+    <meta name="description" content="Docker网络相关知识点，包括CNM、Libnetwork常见网络模式（null、bridge、host、container）等。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="五、Docker网络">
+<meta property="og:title" content="七、Docker网络">
 <meta property="og:url" content="https://kissy.wiki/2022/07/05/docker-network/index.html">
 <meta property="og:site_name" content="Jerry 的技术博客">
-<meta property="og:description" content="Dockerfile的使用机器注意事项">
+<meta property="og:description" content="Docker网络相关知识点，包括CNM、Libnetwork常见网络模式（null、bridge、host、container）等。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
 <meta property="article:published_time" content="2022-07-04T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-03T09:47:18.371Z">
+<meta property="article:modified_time" content="2022-07-04T13:48:02.712Z">
 <meta property="article:author" content="Jerry">
 <meta property="article:tag" content="Docker">
-<meta property="article:tag" content="Dockerfile">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
   
   
   
-  <title>五、Docker网络 - Jerry 的技术博客</title>
+  <title>七、Docker网络 - Jerry 的技术博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -231,7 +230,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle">五、Docker网络</span>
+            <span id="subtitle">七、Docker网络</span>
           
         </div>
 
@@ -254,7 +253,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          24 字
+          5.9k 字
         
       </span>
     
@@ -266,7 +265,7 @@
         
         
           <!-- compatible with older versions-->
-          读完大约需要 1 分钟
+          读完大约需要 15 分钟
         
       </span>
     
@@ -316,7 +315,7 @@
         aria-expanded="true"
       >
         云原生
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -343,7 +342,7 @@
         aria-expanded="true"
       >
         Docker容器技术
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -425,7 +424,7 @@
         aria-expanded="true"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -457,13 +456,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">五、Docker网络</span>
+           ">
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -488,7 +493,7 @@
         aria-expanded="true"
       >
         Docker容器技术
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -570,7 +575,7 @@
         aria-expanded="true"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -602,13 +607,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">五、Docker网络</span>
+           ">
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -629,7 +640,7 @@
         aria-expanded="true"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -661,13 +672,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">五、Docker网络</span>
+           ">
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -687,16 +704,107 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">五、Docker网络</h1>
+            <h1 style="display: none">七、Docker网络</h1>
             
             
               <div class="markdown-body">
                 
-                <div class="note note-success">
-            <p>文字 或者 <code>markdown</code> 均可</p>
+                <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h1><h2 id="1-1-Docker-网络发展史"><a href="#1-1-Docker-网络发展史" class="headerlink" title="1.1 Docker 网络发展史"></a>1.1 Docker 网络发展史</h2><p>Docker 从 2013 年诞生，到后来逐渐成为了容器的代名词，然而 Docker 的野心也不止于此，它还想在更多的领域独占鳌头，比如制定容器的网络和存储标准。于是 Docker 从 1.7 版本开始，便把网络和存储从 Docker 中正式以插件的形式剥离开来，并且分别为其定义了标准，Docker 定义的网络模型标准称之为 ：<strong>CNM (Container Network Model)</strong> 。</p>
+<p>Docker 推出 CNM 的同时，CoreOS 推出了 CNI（Container Network Model）。起初，以 Kubernetes 为代表的容器编排阵营考虑过使用 CNM 作为容器的网络标准，但是后来由于很多技术和非技术原因（如果你对详细原因感兴趣，可以参考<a target="_blank" rel="noopener" href="https://kubernetes.io/blog/2016/01/why-kubernetes-doesnt-use-libnetwork/">这篇博客</a>），Kubernetes 决定支持 CoreOS 推出的容器网络标准 CNI。</p>
+<h2 id="1-2-CNM"><a href="#1-2-CNM" class="headerlink" title="1.2 CNM"></a>1.2 CNM</h2><p>**CNM (Container Network Model) **是 Docker 发布的容器网络标准，意在规范和指定容器网络发展标准，CNM 抽象了容器的网络接口 ，使得只要满足 CNM 接口的网络方案都可以接入到 Docker 容器网络，更好地满足了用户网络模型多样化的需求。</p>
+<p>CNM 只是定义了网络标准，对于底层的具体实现并不太关心，这样便解耦了容器和网络，使得容器的<br>网络模型更加灵活。<br>CNM 定义的网络标准包含三个重要元素。</p>
+<ul>
+<li><strong>沙箱（Sandbox）：</strong>沙箱代表了一系列网络堆栈的配置，其中包含路由信息、网络接口等网络资源的管理，沙箱的实现通常是 Linux 的 Net Namespace，但也可以通过其他技术来实现，比如：FreeBSD jail 等。</li>
+<li><strong>接入点（Endpoint）：</strong>接入点将沙箱连接到网络中，代表容器的网络接口，接入点的实现通常是 Linux 的 veth 设备对。</li>
+<li><strong>网络（Network）：</strong>网络是一组可以互相通信的接入点，它将多接入点组成一个子网，并且多个接入点之间可以相互通信。</li>
+</ul>
+<div class="note note-success">
+            <p>CNM 的三个要素基本抽象了所有网络模型，使得网络模型的开发更加规范。<br>为了更好地构建容器网络标准，Docker 团队把网络功能从 Docker 中剥离出来，成为独立的项目<code>libnetwork</code>，它通过插件的形式为 Docker 提供网络功能。Libnetwork 是开源的，使用 Golang 编写，它完全遵循 CNM 网络规范，是 CNM 的官方实现。</p>
           </div>
 
-<h1 id="一级"><a href="#一级" class="headerlink" title="一级"></a>一级</h1><h2 id="二级"><a href="#二级" class="headerlink" title="二级"></a>二级</h2><h3 id="三级"><a href="#三级" class="headerlink" title="三级"></a>三级</h3><h4 id="四级"><a href="#四级" class="headerlink" title="四级"></a>四级</h4><h5 id="五级"><a href="#五级" class="headerlink" title="五级"></a>五级</h5>
+<h1 id="2-Libnetwork-常见网络模式"><a href="#2-Libnetwork-常见网络模式" class="headerlink" title="2. Libnetwork 常见网络模式"></a>2. Libnetwork 常见网络模式</h1><p>Libnetwork 比较典型的网络模式主要有四种，这四种网络模式基本满足了我们单机容器的所有场景。</p>
+<ol>
+<li><strong>null 空网络模式</strong>：可以帮助我们构建一个没有网络接入的容器环境，以保障数据安全。</li>
+<li><strong>bridge 桥接模式：</strong>可以打通容器与容器间网络通信的需求。</li>
+<li><strong>host 主机网络模式：</strong>可以让容器内的进程共享主机网络，从而监听或修改主机网络。</li>
+<li><strong>container 网络模式：</strong>可以将两个容器放在同一个网络命名空间内，让两个业务通过 localhost 即可实现访问。</li>
+</ol>
+<p>下面我们对 libnetwork 的四种网络模式逐一讲解：</p>
+<h2 id="2-1-null-空网络模式"><a href="#2-1-null-空网络模式" class="headerlink" title="2.1 null 空网络模式"></a>2.1 null 空网络模式</h2><p>有时候，我们需要处理一些保密数据，出于安全考虑，我们需要一个隔离的网络环境执行一些纯计算任务。这时候 null 网络模式就派上用场了，这时候我们的容器就像一个没有联网的电脑，处于一个相对较安全的环境，确保我们的数据不被他人从网络窃取。</p>
+<p><strong>使用 Docker 创建 null 空网络模式的容器时，容器拥有自己独立的</strong><code>**Net Namespace**</code><strong>，但是此时的容器并没有任何网络配置</strong>。在这种模式下，Docker 除了为容器创建了<code>Net Namespace</code>外，没有创建任何：<code>网卡接口</code>、<code>IP 地址</code>、<code>路由</code>等网络配置。<br>例如：我们使用 docker run 命令启动时，添加 –net&#x3D;none 参数启动一个空网络模式的容器，命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run --net=none -it busybox</span><br>/ #  ifconfig<br>lo        Link encap:Local Loopback<br>          inet addr:127.0.0.1  Mask:255.0.0.0<br>          UP LOOPBACK RUNNING  MTU:65536  Metric:1<br>          RX packets:0 errors:0 dropped:0 overruns:0 frame:0<br>          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:1000<br>          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)<br></code></pre></td></tr></table></figure>
+
+<p>可以看到容器内除了 Net Namespace 自带的 lo 网卡并没有创建任何虚拟网卡，然后使用<code>route -n</code>命令查看一下容器内的路由信息:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">/ # route -n<br>Kernel IP routing table<br>Destination     Gateway         Genmask         Flags Metric Ref    Use Iface<br></code></pre></td></tr></table></figure>
+
+<p>可以看到，容器内也并没有配置任何路由信息。</p>
+<h2 id="2-2）bridge-桥接模式"><a href="#2-2）bridge-桥接模式" class="headerlink" title="2.2）bridge 桥接模式"></a>2.2）bridge 桥接模式</h2><p><strong>Docker 的 bridge 网络是启动容器时默认的网络模式</strong>，<strong>使用 bridge 网络可以实现容器与容器的互通，可以从一个容器直接通过容器 IP 访问到另外一个容器</strong>。同时使用 bridge 网络可以实现主机与容器的互通，我们在容器内启动的业务，可以从主机直接请求。</p>
+<p>在介绍 Docker 的 bridge 桥接模式前，我们需要先了解一下 Linux 的<code>veth</code>和<code>bridge</code>相关的技术，因为 Docker 的 bridge 模式正是由这两种技术实现的。<br><strong>Linux veth</strong><br>veth 是 Linux 中的虚拟设备接口，veth 都是成对出现的，它在容器中，通常充当一个桥梁。veth 可以用来连接虚拟网络设备，例如 veth 可以用来连通两个 Net Namespace，从而使得两个 NetNamespace 之间可以互相访问。</p>
+<p><strong>Linux bridge</strong><br>Linux bridge 是一个虚拟设备，是用来连接网络的设备，相当于物理网络环境中的交换机。Linux bridge 可以用来转发两个 Net Namespace 内的流量。</p>
+<ul>
+<li><strong>veth 与 bridge 的关系</strong></li>
+</ul>
+<p><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FoqklU2oZzHSxq7HuRgfx-sGu4jE.png" srcset="/img/loading.gif" lazyload><br>bridge 就像一台交换机，而 veth 就像一根网线，通过交换机和网线可以把两个不同 Net Namespace 的容器连通，使得它们可以互相通信。</p>
+<div class="note note-success">
+            <p>Docker 的 bridge 模式也是这种原理。Docker 启动时，libnetwork 会在主机上创建<code>docker0</code>网桥，docker0 网桥就相当于上图中的交换机，而 Docker 创建出的 brige 模式的容器则都会连接 docker0 上，从而实现网络互通。</p>
+          </div>
+
+<p><strong>bridge 桥接模式是 Docker 的默认网络模式，当我们创建容器时不指定任何网络模式，Docker 启动容器默认的网络模式为 bridge。</strong></p>
+<h2 id="2-3-host-主机网络模式"><a href="#2-3-host-主机网络模式" class="headerlink" title="2.3 host 主机网络模式"></a>2.3 host 主机网络模式</h2><p>容器内的网络并不是希望永远跟主机是隔离的，有些基础业务需要创建或更新主机的网络配置，我们的程序必须以主机网络模式运行才能够修改主机网络，这时候就需要用到 Docker 的 host 主机网络模式。</p>
+<p>使用 host 主机网络模式时：</p>
+<ul>
+<li><strong>libnetwork 不会为容器创建新的网络配置和 Net Namespace。</strong></li>
+<li>Docker 容器中的进程直接共享主机的网络配置，可以直接使用主机的网络信息，此时，在容器内监听的端口，也将直接占用到主机的端口。</li>
+<li>除了网络共享主机的网络外，其他的包括进程、文件系统、主机名等都是与主机隔离的。</li>
+</ul>
+<p><strong>host 主机网络模式通常适用于想要使用主机网络，但又不想把运行环境直接安装到主机上的场景中</strong>。例如我想在主机上运行一个 busybox 服务，但又不想直接把 busybox 安装到主机上污染主机环境，此时我可以使用以下命令启动一个主机网络模式的 busybox 镜像：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -it --net=host busybox</span><br><br>/ # ifconfig<br>docker0   Link encap:Ethernet  HWaddr 02:42:6A:DD:E9:7B<br>          inet addr:172.17.0.1  Bcast:172.17.255.255  Mask:255.255.0.0<br>          inet6 addr: fe80::42:6aff:fedd:e97b/64 Scope:Link<br>          UP BROADCAST MULTICAST  MTU:1500  Metric:1<br>          RX packets:0 errors:0 dropped:0 overruns:0 frame:0<br>          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:0<br>          RX bytes:0 (0.0 B)  TX bytes:746 (746.0 B)<br><br>ens192    Link encap:Ethernet  HWaddr 00:0C:29:A6:AF:A0<br>          inet addr:172.16.2.77  Bcast:172.16.2.255  Mask:255.255.255.0<br>          inet6 addr: fe80::2a6f:4800:8e71:ce88/64 Scope:Link<br>          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1<br>          RX packets:125857 errors:0 dropped:7131 overruns:0 frame:0<br>          TX packets:13372 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:1000<br>          RX bytes:101567720 (96.8 MiB)  TX bytes:1082859 (1.0 MiB)<br><br>lo        Link encap:Local Loopback<br>          inet addr:127.0.0.1  Mask:255.0.0.0<br>          inet6 addr: ::1/128 Scope:Host<br>          UP LOOPBACK RUNNING  MTU:65536  Metric:1<br>          RX packets:68 errors:0 dropped:0 overruns:0 frame:0<br>          TX packets:68 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:1000<br>          RX bytes:5904 (5.7 KiB)  TX bytes:5904 (5.7 KiB)<br></code></pre></td></tr></table></figure>
+
+<p>可以看到容器内的网络环境与主机完全一致。</p>
+<h2 id="2-4-container-网络模式"><a href="#2-4-container-网络模式" class="headerlink" title="2.4 container 网络模式"></a>2.4 container 网络模式</h2><p><strong>container 网络模式允许一个容器共享另一个容器的网络命名空间</strong>。当两个容器需要共享网络，但其他资源仍然需要隔离时就可以使用 container 网络模式。例如我们开发了一个 http 服务，但又想使用 nginx 的一些特性，让 nginx 代理外部的请求然后转发给自己的业务，这时我们使用 container 网络模式将自己开发的服务和 nginx 服务部署到同一个网络命名空间中。</p>
+<p>下面我举例说明。首先我们使用以下命令启动一个 busybox1 容器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=busybox1 busybox <span class="hljs-built_in">sleep</span> 3600</span><br></code></pre></td></tr></table></figure>
+
+<p>然后我们使用 docker exec 命令进入到 centos 容器中查看一下网络配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker <span class="hljs-built_in">exec</span> -it busybox1 sh</span><br>/ # ifconfig<br>eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02<br>          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0<br>          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1<br>          RX packets:9 errors:0 dropped:0 overruns:0 frame:0<br>          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:0<br>          RX bytes:806 (806.0 B)  TX bytes:0 (0.0 B)<br><br>lo        Link encap:Local Loopback<br>          inet addr:127.0.0.1  Mask:255.0.0.0<br>          UP LOOPBACK RUNNING  MTU:65536  Metric:1<br>          RX packets:0 errors:0 dropped:0 overruns:0 frame:0<br>          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:1000<br>          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)<br></code></pre></td></tr></table></figure>
+
+<p>可以看到 busybox1 的 IP 地址为<code>172.17.0.2</code>。<br>然后我们新打开一个命令行窗口，再启动一个 busybox2 容器，通过 container 网络模式连接到 busybox1 的网络，命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -it --net=container:busybox1 --name=busybox2 busybox sh</span><br></code></pre></td></tr></table></figure>
+
+<p>在 busybox2 容器内同样使用 ifconfig 命令查看一下容器内的网络配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">/ # ip addr<br>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000<br>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00<br>    inet 127.0.0.1/8 scope host lo<br>       valid_lft forever preferred_lft forever<br>8: eth0@if9: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue<br>    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff<br>    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0<br>       valid_lft forever preferred_lft forever<br></code></pre></td></tr></table></figure>
+
+<p>可以看到 busybox2 容器的网络 IP 也为 172.17.0.2，与 busybox1 的网络一致。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><table>
+<thead>
+<tr>
+<th>Libnetwork 网络模式</th>
+<th>用途</th>
+<th>场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>null</td>
+<td>不提供任何网络</td>
+<td>处于安全考量，需要一个独立的网络环境只用于纯计算任务</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td>容器与容器间互通</td>
+<td>容器需要实现网络通信</td>
+</tr>
+<tr>
+<td>host</td>
+<td>容器与主机网络共享</td>
+<td>容器需要使用主机网络或使用主机网络提供服务</td>
+</tr>
+<tr>
+<td>container</td>
+<td>将两个容器放到同一网络空间，容器间通风 localhost 访问</td>
+<td>两个容器间通过 localhost 通信</td>
+</tr>
+</tbody></table>
+
                 
               </div>
             
@@ -745,8 +853,6 @@
       
         <a href="/tags/Docker/">#Docker</a>
       
-        <a href="/tags/Dockerfile/">#Dockerfile</a>
-      
     </div>
   
 </div>
@@ -757,7 +863,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>五、Docker网络</div>
+      <div>七、Docker网络</div>
       <div>https://kissy.wiki/2022/07/05/docker-network/</div>
     </div>
     <div class="license-meta">
@@ -804,8 +910,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理">
-                        <span class="hidden-mobile">五、Docker Volume使用与原理</span>
+                      <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver">
+                        <span class="hidden-mobile">六、 Docker StorageDriver</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

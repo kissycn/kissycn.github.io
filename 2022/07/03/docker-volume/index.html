@@ -16,16 +16,16 @@
   <meta name="author" content="Jerry">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Dockerfile Volumn 实现原理以及创建使用、查看、删除等操作。">
+    <meta name="description" content="Dockerfile Volumn 实现原理以及创建使用、查看、删除等操作。另外，容器与容器间数据共享、主机与容器间数据共享为案例，进一步了解volume原理。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="五、Docker Volume使用与原理">
 <meta property="og:url" content="https://kissy.wiki/2022/07/03/docker-volume/index.html">
 <meta property="og:site_name" content="Jerry 的技术博客">
-<meta property="og:description" content="Dockerfile Volumn 实现原理以及创建使用、查看、删除等操作。">
+<meta property="og:description" content="Dockerfile Volumn 实现原理以及创建使用、查看、删除等操作。另外，容器与容器间数据共享、主机与容器间数据共享为案例，进一步了解volume原理。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
 <meta property="article:published_time" content="2022-07-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-03T09:47:18.371Z">
+<meta property="article:modified_time" content="2022-07-04T13:42:57.056Z">
 <meta property="article:author" content="Jerry">
 <meta property="article:tag" content="Docker">
 <meta property="article:tag" content="DockerVolume">
@@ -254,7 +254,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5k 字
+          5.2k 字
         
       </span>
     
@@ -316,7 +316,7 @@
         aria-expanded="true"
       >
         云原生
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -343,7 +343,7 @@
         aria-expanded="true"
       >
         Docker容器技术
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -425,7 +425,7 @@
         aria-expanded="true"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -457,13 +457,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
            ">
-          <span class="category-post">五、Docker网络</span>
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -488,7 +494,7 @@
         aria-expanded="true"
       >
         Docker容器技术
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -570,7 +576,7 @@
         aria-expanded="true"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -602,13 +608,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
            ">
-          <span class="category-post">五、Docker网络</span>
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -629,7 +641,7 @@
         aria-expanded="true"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -661,13 +673,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
            ">
-          <span class="category-post">五、Docker网络</span>
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -697,7 +715,10 @@
 <li>无状态的（数据不需要被持久化）</li>
 <li>有状态的（数据需要被持久化）</li>
 </ul>
-<p>在实际业务总是有各种需要数据持久化的场景，比如 MySQL、Kafka 等有状态的业务。因此为了解决有状态业务的需求，Docker 提出了卷（Volume）的概念。<br>什么是卷？<strong>卷的本质是文件或者目录，它可以绕过默认的联合文件系统，直接以文件或目录的形式存在于宿主机上。</strong><br>卷的概念不仅解决了数据持久化的问题，还解决了容器间共享数据的问题。<strong>使用卷可以将容器内的目录或文件持久化，当容器重启后保证数据不丢失</strong>。例如我们可以使用卷将 MySQL 的目录持久化，实现容器重启数据库数据不丢失。<br>Docker 提供了卷（Volume）的功能，使用 docker volume 命令可以实现对卷的创建、查看和删除等操作。下面我们来详细了解一下这些命令。</p>
+<p>在实际业务总是有各种需要数据持久化的场景，比如 MySQL、Kafka 等有状态的业务。因此为了解决有状态业务的需求，Docker 提出了卷（Volume）的概念。</p>
+<p>什么是卷？<strong>卷的本质是文件或者目录，它可以绕过默认的联合文件系统，直接以文件或目录的形式存在于宿主机上。</strong></p>
+<p>卷的概念不仅解决了数据持久化的问题，还解决了容器间共享数据的问题。<strong>使用卷可以将容器内的目录或文件持久化，当容器重启后保证数据不丢失</strong>。例如我们可以使用卷将 MySQL 的目录持久化，实现容器重启数据库数据不丢失。</p>
+<p>Docker 提供了卷（Volume）的功能，使用 docker volume 命令可以实现对卷的创建、查看和删除等操作。下面我们来详细了解一下这些命令。</p>
 <h1 id="2-Docker-Volume-操作"><a href="#2-Docker-Volume-操作" class="headerlink" title="2. Docker Volume 操作"></a>2. Docker Volume 操作</h1><h2 id="2-1-Volume-创建和使用"><a href="#2-1-Volume-创建和使用" class="headerlink" title="2.1 Volume 创建和使用"></a>2.1 Volume 创建和使用</h2><p><strong>创建容器卷：</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker volume create [OPTIONS] [VOLUME]</span><br></code></pre></td></tr></table></figure>
 
@@ -711,7 +732,11 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">-v, --volume=[host-src:]container-dest[:&lt;options&gt;]: 将宿主机src目录挂载到容器的dest.<br></code></pre></td></tr></table></figure>
 
 <p>示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">在宿主机上创建一个临时目录/var/lib/docker/volumes/[VOLUME_ID]/_data，</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">然后把它挂载到容器的/test目录上</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /test</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">Docker 就直接把宿主机的/home目录挂载到容器的/test目录上</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /home:/test</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">情况一：在宿主机上创建一个临时目录/var/lib/docker/volumes/[VOLUME_ID]/_data，</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">然后把它挂载到容器的/test目录上</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /test</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">情况二：Docker 就直接把宿主机的/home目录挂载到容器的/test目录上</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -v /home:/test</span><br></code></pre></td></tr></table></figure>
+
+<div class="note note-success">
+            <p>第一种情况：由于你并没有显示声明宿主机目录，那么 Docker 就会默认在宿主机上创建一个临时目录<code>/var/lib/docker/volumes/[VOLUME_ID]/_data</code>，然后把它挂载到容器的 &#x2F;test 目录上。</p><p>第二种情况：Docker 就直接把宿主机的 &#x2F;home 目录挂载到容器的 &#x2F;test 目录上。</p>
+          </div>
 
 <p><strong>2、自动创建挂载</strong><br>当使用<code>docker -v</code>的方式指定容器持久化路径<code>src</code>参数为空时，Docker 会自动为我们创建卷，并且绑定到容器中，使用命令如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run -d --name=nginx-volume -v /usr/share/nginx/html nginx</span><br></code></pre></td></tr></table></figure>
@@ -747,7 +772,8 @@
 <p><strong>步骤三：往生产者挂载目录写入数据观察消费者情况</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">往log-producer容器写入数据</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hello, My log.&quot;</span> &gt;&gt;/tmp/log/mylog.log</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在log-consumer查看上面写入的数据</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> /tmp/log/mylog.log</span><br>Hello, My log.<br></code></pre></td></tr></table></figure>
 
-<h1 id="4-主机与容器间数据共享"><a href="#4-主机与容器间数据共享" class="headerlink" title="4. 主机与容器间数据共享"></a>4. 主机与容器间数据共享</h1><p>Docker 卷的目录默认在 &#x2F;var&#x2F;lib&#x2F;docker 下，当我们想把主机的其他目录映射到容器内时，就需要用到主机与容器之间数据共享的方式了，例如我想把 MySQL 容器中的 &#x2F;var&#x2F;lib&#x2F;mysql 目录映射到主机的&#x2F;var&#x2F;lib&#x2F;mysql 目录中，我们就可以使用主机与容器之间数据共享的方式来实现。<br>要实现容器与宿主机间文件共享非常简单，只需要将<code>docker -v</code>的<code>src参数</code>设置为宿主机的目录即可：</p>
+<h1 id="4-主机与容器间数据共享"><a href="#4-主机与容器间数据共享" class="headerlink" title="4. 主机与容器间数据共享"></a>4. 主机与容器间数据共享</h1><p>Docker 卷的目录默认在 &#x2F;var&#x2F;lib&#x2F;docker 下，当我们想把主机的其他目录映射到容器内时，就需要用到主机与容器之间数据共享的方式了，例如我想把 MySQL 容器中的 &#x2F;var&#x2F;lib&#x2F;mysql 目录映射到主机的&#x2F;var&#x2F;lib&#x2F;mysql 目录中，我们就可以使用主机与容器之间数据共享的方式来实现。</p>
+<p>要实现容器与宿主机间文件共享非常简单，只需要将<code>docker -v</code>的<code>src参数</code>设置为宿主机的目录即可：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">-v, --volume=[host-src:]container-dest[:&lt;options&gt;]: 将宿主机src目录挂载到容器的dest.<br></code></pre></td></tr></table></figure>
 
 <p>例如：将主机的<code>/data</code>目录挂载到容器中的<code>/usr/local/data</code>中</p>
@@ -866,9 +892,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/07/05/docker-network/" title="五、Docker网络">
+                      <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">五、Docker网络</span>
+                        <span class="hidden-mobile">六、 Docker StorageDriver</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     

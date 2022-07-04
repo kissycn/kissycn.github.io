@@ -1,0 +1,1271 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Jerry">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文介绍Docker的联合文件系统及其常见的系统实现，如：AUFS、DeviceMapper、OverlayFS的使用场景、原理、示例等。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="六、 Docker StorageDriver">
+<meta property="og:url" content="https://kissy.wiki/2022/07/04/docker-storage-driver/index.html">
+<meta property="og:site_name" content="Jerry 的技术博客">
+<meta property="og:description" content="本文介绍Docker的联合文件系统及其常见的系统实现，如：AUFS、DeviceMapper、OverlayFS的使用场景、原理、示例等。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
+<meta property="article:published_time" content="2022-07-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-04T13:46:18.155Z">
+<meta property="article:author" content="Jerry">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
+  
+  
+  
+  <title>六、 Docker StorageDriver - Jerry 的技术博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kissy.wiki","root":"/","version":"1.9.2","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":2},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":"ture","follow_dnt":true,"baidu":"75f8d971da6d372cc0c437d1ca828b7f","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?75f8d971da6d372cc0c437d1ca828b7f";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jerry的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">六、 Docker StorageDriver</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-07-04 00:00" pubdate>
+          2022年7月4日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          16k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          读完大约需要 40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="云原生"
+        id="heading-03eadd6d06506d54fb81026b2f5963c8" role="tab" data-toggle="collapse" href="#collapse-03eadd6d06506d54fb81026b2f5963c8"
+        aria-expanded="true"
+      >
+        云原生
+        <span class="list-group-count">(7)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-03eadd6d06506d54fb81026b2f5963c8"
+           role="tabpanel" aria-labelledby="heading-03eadd6d06506d54fb81026b2f5963c8">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(7)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="false"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="一、Docker入门基础"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">一、Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="二、Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">二、Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="三、DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">三、DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="true"
+      >
+        Docker进阶
+        <span class="list-group-count">(4)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">四、Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">五、Docker Volume使用与原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">六、 Docker StorageDriver</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker容器技术"
+        id="heading-97f7d08a9004a3ff1d2d955460efe517" role="tab" data-toggle="collapse" href="#collapse-97f7d08a9004a3ff1d2d955460efe517"
+        aria-expanded="true"
+      >
+        Docker容器技术
+        <span class="list-group-count">(7)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-97f7d08a9004a3ff1d2d955460efe517"
+           role="tabpanel" aria-labelledby="heading-97f7d08a9004a3ff1d2d955460efe517">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker基础"
+        id="heading-8c19c8528e5a7b6d20e476b9c5759c7e" role="tab" data-toggle="collapse" href="#collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+        aria-expanded="false"
+      >
+        Docker基础
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8c19c8528e5a7b6d20e476b9c5759c7e"
+           role="tabpanel" aria-labelledby="heading-8c19c8528e5a7b6d20e476b9c5759c7e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/06/20/docker-startup/" title="一、Docker入门基础"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">一、Docker入门基础</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/21/docker-file/" title="二、Dockerfile镜像指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">二、Dockerfile镜像指令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/24/docker-cli-command/" title="三、DockerCLI容器指令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">三、DockerCLI容器指令</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="true"
+      >
+        Docker进阶
+        <span class="list-group-count">(4)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">四、Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">五、Docker Volume使用与原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">六、 Docker StorageDriver</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Docker进阶"
+        id="heading-1980f2bb9662d0758185b4cbeb3c67e8" role="tab" data-toggle="collapse" href="#collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+        aria-expanded="true"
+      >
+        Docker进阶
+        <span class="list-group-count">(4)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-1980f2bb9662d0758185b4cbeb3c67e8"
+           role="tabpanel" aria-labelledby="heading-1980f2bb9662d0758185b4cbeb3c67e8">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/07/01/docker-principle/" title="四、Docker核心技术原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">四、Docker核心技术原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">五、Docker Volume使用与原理</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">六、 Docker StorageDriver</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">六、 Docker StorageDriver</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1-联合文件系统"><a href="#1-联合文件系统" class="headerlink" title="1.联合文件系统"></a>1.联合文件系统</h1><p>联合文件系统（Union File System，Unionfs）是一种分层的轻量级文件系统，<strong>它可以把多个目录内容联合挂载到同一目录下，从而形成一个单一的文件系统，这种特性可以让使用者像是使用一个目录一样使用联合文件系统</strong>。<br>例如：现在有两个目录 A 和 B，它们分别有两个文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">tree .</span><br>├── A<br>│ ├── a<br>│ └── x<br>└── B<br>  ├── b<br>  └── x<br></code></pre></td></tr></table></figure>
+
+<p>然后，我使用联合挂载的方式，将这两个目录挂载到一个公共的目录 C 上：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">mkdir</span> C</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">mount -t aufs -o <span class="hljs-built_in">dirs</span>=./A:./B none ./C</span><br></code></pre></td></tr></table></figure>
+
+<p>这时，我再查看目录 C 的内容，就能看到目录 A 和 B 下的文件被合并到了一起，此外，如果你在目录 C 里对 a、b、x 文件做修改，这些修改也会在对应的目录 A、B 中生效。：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">tree ./C</span><br>./C<br>├── a<br>├── b<br>└── x<br></code></pre></td></tr></table></figure>
+
+<p>那联合文件系统对于 Docker 是一个怎样的存在呢？它可以说是 Docker 镜像和容器的基础，因为它可以<strong>使 Docker 可以把镜像做成分层的结构，从而使得镜像的每一层可以被共享</strong>。例如两个业务镜像都是基于 CentOS 7 镜像构建的，那么这两个业务镜像在物理机上只需要存储一次 CentOS 7 这个基础镜像即可，从而节省大量存储空间。</p>
+<p>联合文件系统只是一个概念，真正实现联合文件系统才是关键，那如何实现呢？其实实现方案有很多，Docker 中最常用的联合文件系统有三种：AUFS、Devicemapper 和 OverlayFS。</p>
+<p>在开始介绍三种文件系统之前需要明白两个原理，分别是：<code>写时复制（CoW）</code>和<code>用时分配（allocate-on-demand）</code></p>
+<h2 id="1-1-写时复制（CoW）"><a href="#1-1-写时复制（CoW）" class="headerlink" title="1.1 写时复制（CoW）"></a>1.1 写时复制（CoW）</h2><p>所有驱动都用到的技术——写时复制（CoW）。<code>CoW就是copy-on-write</code>，表示：<strong>只在需要写时才去复制，这个是针对已有文件的修改场景</strong>。</p>
+<p>比如：基于一个 image 启动多个 Container，如果为每个 Container 都去分配一个 image 一样的文件系统，那么将会占用大量的磁盘空间。而 CoW 技术可以让所有的容器共享 image 的文件系统，所有数据都从 image 中读取，只有当要对文件进行写操作时，才从 image 里把要写的文件复制到自己的文件系统进行修改。</p>
+<p>所以无论有多少个容器共享同一个 image，所做的写操作都是对从 image 中复制到自己的文件系统中的复本上进行，并不会修改 image 的源文件，且多个容器操作同一个文件，会在每个容器的文件系统里生成一个复本，每个容器修改的都是自己的复本，相互隔离，相互不影响。<strong>使用 CoW 可以有效的提高磁盘的利用率</strong>。</p>
+<h2 id="1-2-用时分配（allocate-on-demand）"><a href="#1-2-用时分配（allocate-on-demand）" class="headerlink" title="1.2 用时分配（allocate-on-demand）"></a>1.2 用时分配（allocate-on-demand）</h2><p>而用时分配是用在：<strong>原本没有这个文件的场景，只有在要新写入一个文件时才分配空间，这样可以提高存储资源的利用率</strong>。比如启动一个容器，并不会为这个容器预分配一些磁盘空间，而是当有新文件写入时，才按需分配新空间。</p>
+<h1 id="2-AUFS"><a href="#2-AUFS" class="headerlink" title="2.AUFS"></a>2.AUFS</h1><h2 id="2-1-概述"><a href="#2-1-概述" class="headerlink" title="2.1 概述"></a>2.1 概述</h2><p>AUFS（AnotherUnionFS）是一种 Union FS，是文件级的存储驱动。<strong>AUFS 能透明覆盖一或多个现有文件系统的层状文件系统，把多层合并成文件系统的单层表示</strong>，<strong>简单来说就是支持将不同目录挂载到同一个虚拟文件系统下的文件系统</strong>。</p>
+<p>这种文件系统可以一层一层地叠加修改文件。<strong>无论底下有多少层都是只读的，只有最上层的文件系统是可写的</strong>。当需要修改一个文件时，AUFS 创建该文件的一个副本，使用 CoW 将文件从只读层复制到可写层进行修改，结果也保存在可写层。在 Docker 中，底下的只读层就是 image，可写层就是 Container。结构如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FoIUkTpTy6jdEDUzOT3mPzZg00i2.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-示例"><a href="#2-2-示例" class="headerlink" title="2.2 示例"></a>2.2 示例</h2><p>AUFS 目前并未被合并到 Linux 内核主线，因此只有 Ubuntu 和 Debian 等少数操作系统支持 AUFS。你可以使用以下命令查看你的系统是否支持 AUFS：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">执行以上命令后，如果输出结果包含 aufs ，则代表当前操作系统支持 AUFS</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">grep aufs /proc/filesystems</span><br>nodev aufs<br></code></pre></td></tr></table></figure>
+
+<div class="note note-warning">
+            <p>AUFS 推荐在 Ubuntu 或 Debian 操作系统下使用，如果你想要在 CentOS 等操作系统下使用 AUFS，需要单独安装 AUFS 模块（生产环境不推荐在 CentOS 下使用 AUFS，如果你想在 CentOS 下安装 AUFS 用于研究和测试，可以参考这个<a target="_blank" rel="noopener" href="https://github.com/bnied/kernel-ml-aufs">链接</a>）</p>
+          </div>
+<p><strong>1）centos 下安装 aufs</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">进入repo目录</span><br>cd /etc/yum.repos.d<br><span class="hljs-meta prompt_"># </span><span class="language-bash">下载文件</span><br>wget https://yum.spaceduck.org/kernel-ml-aufs/kernel-ml-aufs.repo<br><span class="hljs-meta prompt_"># </span><span class="language-bash">安装</span><br>yum install kernel-ml-aufs<br><br>vi /etc/default/grub<br><span class="hljs-meta prompt_"># </span><span class="language-bash">修改参数, 表示启动时选择第一个内核</span><br><span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment">##################################</span></span><br>GRUB_DEFAULT=0<br><span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment">##################################</span></span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">重新生成grub.cfg</span><br>grub2-mkconfig -o /boot/grub2/grub.cfg<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">重启计算机</span><br>reboot<br></code></pre></td></tr></table></figure>
+
+<p><strong>2）示例：</strong><br>本次演示示例将通过创建三个文件（如下）通过 aufs 挂载到&#x2F;mnt 目录下，并修改相应文件内容观察对应挂载目录&#x2F;mnt 的变化情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">tree /tmp/aufs/</span><br>/tmp/aufs/<br>├── container1         ## 容器层<br>│   └── container.txt<br>├── image1						 ## 镜像层<br>│   └── image1.txt<br>├── image2						 ## 镜像层<br>│   └── image2.txt<br>└── mnt								 ## 联合目录<br></code></pre></td></tr></table></figure>
+
+<p>操作示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cd</span> /tmp/aufs/</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">mkdir</span> container1 image1 image2 mnt</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> Hello, Container layer! &gt; container1/container1.txt</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> Hello, Image layer1! &gt; image1/image1.txt</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> Hello, Image layer2! &gt; image2/image2.txt</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">该命令为通过aufs创建一个联合文件系统，container1在最上边</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">mount -t aufs -o <span class="hljs-built_in">dirs</span>=./container1:./image2:./image1 none ./mnt</span><br></code></pre></td></tr></table></figure>
+
+<p>执行完上述命令后，mnt 变成了 AUFS 的联合挂载目录，我们可以使用 mount 命令查看一下已经创建的 AUFS 文件系统：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">mount -t aufs</span><br>none on /tmp/mnt type aufs (rw,relatime,si=4108481ec17420a7)<br></code></pre></td></tr></table></figure>
+
+<p>我们每创建一个 AUFS 文件系统，AUFS 都会为我们生成一个 ID，这个 ID 在 &#x2F;sys&#x2F;fs&#x2F;aufs&#x2F; 会创建对应的目录，在这个 ID 的目录下可以查看文件挂载的权限（需要逐一查看每个文件值）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> /sys/fs/aufs/si_4108481ec17420a7</span><br>/tmp/aufs/container1=rw<br>/tmp/aufs/image2=ro<br>/tmp/aufs/image1=ro<br></code></pre></td></tr></table></figure>
+
+<p>可以看到<code>container1</code>目录的权限为<code>rw（代表可读写)``image1</code>和<code>image2</code>的权限为<code>ro（代表只读）</code>。<br>为了验证 mnt 目录下可以看到 container1、image1 和 image2 目录下的所有内容，我们使用 ls 命令查看一下 mnt 目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> mnt/</span><br>container1.txt  image1.txt  image2.txt<br></code></pre></td></tr></table></figure>
+
+<p><strong>3）验证 AUFS 的写时复制</strong><br><strong>AUFS 的写时复制是指在容器中，只有需要修改某个文件时，才会把文件从镜像层复制到容器层</strong>，下面我们通过修改联合挂载目录 mnt 下的内容来验证下这个过程。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">注意：是修改容器目录下的image1.txt</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">echo</span> Hello, Image layer1 changed! &gt; mnt/image1.txt</span><br></code></pre></td></tr></table></figure>
+
+<p>然后我们查看下 image1&#x2F;image1.txt 文件内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> image1/image1.txt</span><br>Hello, Image layer1!<br></code></pre></td></tr></table></figure>
+
+<p>发现 “镜像层” 的 image1.txt 文件并未被修改。然后我们查看一下 “容器层” 对应的 image1.txt 文件内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> container1/</span><br>container1.txt  image1.txt<br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> container1/image1.txt</span><br>Hello, Image layer1 changed!<br></code></pre></td></tr></table></figure>
+
+<p><strong>发现 AUFS 在 “容器层” 自动创建了 image1.txt 文件，并且内容为我们刚才写入的内容。</strong></p>
+<h2 id="2-3-原理"><a href="#2-3-原理" class="headerlink" title="2.3 原理"></a>2.3 原理</h2><p>AUFS 是联合文件系统，意味着它在主机上使用多层目录存储，每一个目录在 AUFS 中都叫作分支，而在 Docker 中则称之为层（layer），但最终呈现给用户的则是一个普通单层的文件系统，我们把多层以单一层的方式呈现出来的过程叫作联合挂载。<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/Fqi04pwC0nLgmUHuGu4pfHyvm8jN.png" srcset="/img/loading.gif" lazyload><br>如图 1 所示，每一个镜像层和容器层都是<code>/var/lib/docker</code>下的一个子目录，镜像层和容器层都<code>aufs/diff</code>目录下，每一层的目录名称是镜像或容器的 ID 值，联合挂载点在<code>aufs/mnt</code>目录下，mnt 目录是真正的容器工作目录。</p>
+<p><strong>aufs 读写原理</strong><br>AUFS 的工作过程中对文件的操作分为读取文件和修改文件。下面我们分别来看下 AUFS 对于不同的文件操作是如何工作的。<br><strong>1.）读取文件</strong><br>当我们在容器中读取文件时，可能会有以下场景：</p>
+<ul>
+<li>文件在容器层中存在时：直接从容器层读取。</li>
+<li>当文件在容器层中不存在时：从镜像层查找该文件，然后读取文件内容。</li>
+<li>文件既存在于镜像层，又存在于容器层：将会从容器层读取该文件。</li>
+</ul>
+<p><strong>2）修改文件或目录</strong><br>AUFS 对文件的修改采用的是<code>写时复制</code>的工作机制，这种工作机制可以最大程度节省存储空间。具体的文件操作机制如下：</p>
+<ul>
+<li>第一次修改文件：当我们第一次在容器中修改某个文件时，AUFS 会触发写时复制操作，AUFS 首先从镜像层复制文件到容器层，然后再执行对应的修改操作。</li>
+</ul>
+<div class="note note-warning">
+            <p>AUFS 写时复制的操作将会复制整个文件，如果文件过大，将会大大降低文件系统的性能，因此当我们有大量文件需要被修改时，AUFS 可能会出现明显的延迟。好在，写时复制操作只在第一次修改文件时触发，对日常使用没有太大影响。</p>
+          </div>
+
+<ul>
+<li>删除文件或目录：当文件或目录被删除时，AUFS 并不会真正从镜像中删除它，因为镜像层是只读的，AUFS 会创建一个特殊的文件或文件夹，这种特殊的文件或文件夹会阻止容器的访问（通过一种叫 whiteout “白障”的机制）。</li>
+</ul>
+<div class="note note-success">
+            <p>为了实现这样的删除操作，AuFS 会在可读写层创建一个 whiteout 文件，把只读层里的文件“遮挡”起来。<br>比如，你要删除只读层里一个名叫 foo 的文件，那么这个删除操作实际上是在可读写层创建了一个名叫.wh.foo 的文件。这样，当这两个层被联合挂载之后，foo 文件就会被.wh.foo 文件“遮挡”起来，“消失”了。<br>这个功能，就是“ro+wh”的挂载方式，即只读 +whiteout 的含义。我喜欢把 whiteout 形象地翻译为：“白障”。</p>
+          </div>
+
+<h1 id="3-Devicemapper"><a href="#3-Devicemapper" class="headerlink" title="3.Devicemapper"></a>3.Devicemapper</h1><h2 id="3-1-概述"><a href="#3-1-概述" class="headerlink" title="3.1 概述"></a>3.1 概述</h2><p>Device mapper 是 Linux 内核 2.6.9 后支持的，<strong>提供的一种从逻辑设备到物理设备的映射框架机制，在该机制下，用户可以很方便的根据自己的需要制定实现存储资源的管理策略</strong>。前面讲的 AUFS 和 OverlayFS 都是<code>文件级存储</code>，而 Device mapper 是<code>块级存储</code>，所有的操作都是直接对块进行操作，而不是文件。</p>
+<p>Device mapper 驱动会先在块设备上创建一个资源池，然后在资源池上创建一个带有文件系统的基本设备，所有镜像都是这个基本设备的快照，而容器则是镜像的快照。所以在容器里看到文件系统是资源池上基本设备的文件系统的快照，并不有为容器分配空间。</p>
+<p><strong>当要写入一个新文件时，在容器的镜像内为其分配新的块并写入数据，这个叫用时分配。当要修改已有文件时，再使用 CoW 为容器快照分配块空间，将要修改的数据复制到在容器快照中新的块里再进行修改。</strong>Device mapper 驱动默认会创建一个 100G 的文件包含镜像和容器。每一个容器被限制在 10G 大小的卷内，可以自己配置调整。结构如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FpL9UhZigZgcSUVbrn9ue4dCDFlf.png" srcset="/img/loading.gif" lazyload></p>
+<div class="note note-success">
+            <p>Devicemapper 提供了一种将物理块设备映射到虚拟块设备的机制，目前 Linux 下比较流行的 LVM（Logical Volume Manager 是 Linux 下对磁盘分区进行管理的一种机制）和软件磁盘阵列（将多个较小的磁盘整合成为一个较大的磁盘设备用于扩大磁盘存储和提供数据可用性）都是基于 Devicemapper 机制实现的。</p>
+          </div>
+
+<h2 id="3-2-示例"><a href="#3-2-示例" class="headerlink" title="3.2 示例"></a>3.2 示例</h2><p>Docker 的 Devicemapper 模式有两种：第一种是 loop-lvm 模式，该模式主要用来开发和测试使用；第二种是 direct-lvm 模式，该模式推荐在生产环境中使用。<br><strong>1）配置 loop-lvm 模式</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"> sudo systemctl stop docker</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">vi  /etc/docker/daemon.json</span><br>&#123;<br>   &quot;storage-driver&quot;:&quot;devicemapper&quot;<br>&#125;<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo systemctl start docker</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker info</span><br>...<br>Storage Driver: devicemapper<br>...<br></code></pre></td></tr></table></figure>
+
+<p>2）配置 direct-lvm 模式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo systemctl stop docker</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">vi  /etc/docker/daemon.json</span><br>&#123;<br>   &quot;storage-driver&quot;:&quot;devicemapper&quot;,<br>   &quot;storage-opts&quot;:[<br>      &quot;dm.directlvm_device=/dev/xdf&quot;,<br>      &quot;dm.thinp_percent=95&quot;,<br>      &quot;dm.thinp_metapercent=1&quot;,<br>      &quot;dm.thinp_autoextend_threshold=80&quot;,<br>      &quot;dm.thinp_autoextend_percent=20&quot;,<br>      &quot;dm.directlvm_device_force=false&quot;<br>   ]<br>&#125;<br><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo systemctl start docker</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker info</span><br>......<br>Storage Driver: devicemapper<br>Pool Name: docker-thinpool<br>......<br></code></pre></td></tr></table></figure>
+
+<p>其中 directlvm_device 指定需要用作 Docker 存储的磁盘路径，Docker 会动态为我们创建对应的存储池。例如这里我想把 &#x2F;dev&#x2F;xdf 设备作为我的 Docker 存储盘，directlvm_device 则配置为 &#x2F;dev&#x2F;xdf。</p>
+<h2 id="3-3-原理"><a href="#3-3-原理" class="headerlink" title="3.3 原理"></a>3.3 原理</h2><p><strong>1）Devicemapper 关键技术</strong><br>Devicemapper 将主要的工作部分分为用户空间和内核空间：</p>
+<ul>
+<li><strong>用户空间</strong>：负责配置具体的设备映射策略与相关的内核空间控制逻辑，例如逻辑设备 dm-a 如何与物</li>
+</ul>
+<p>理设备 sda 相关联，怎么建立逻辑设备和物理设备的映射关系等。</p>
+<ul>
+<li><strong>内核空间</strong>：则负责用户空间配置的关联关系实现，例如当 IO 请求到达虚拟设备 dm-a 时，内核空间</li>
+</ul>
+<p>负责接管 IO 请求，然后处理和过滤这些 IO 请求并转发到具体的物理设备 sda 上。</p>
+<p><strong>2）Devicemapper 三个核心概念</strong><br>Devicemapper 的工作机制主要围绕三个核心概念：</p>
+<ul>
+<li><strong>映射设备（mapped device）</strong>：即对外提供的逻辑设备，它是由 Devicemapper 模拟的一个虚拟、设备，并不是真正存在于宿主机上的物理设备。</li>
+<li><strong>目标设备（target device）</strong>：目标设备是映射设备对应的物理设备或者物理设备的某一个逻辑分段，是真正存在于物理机上的设备。</li>
+<li><strong>映射表（map table）</strong>：映射表记录了映射设备到目标设备的映射关系，它记录了映射设备在目标设备的起始地址、范围和目标设备的类型等变量。</li>
+</ul>
+<p><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FmiYXLqsKbW3-qTWDfsv8nm3u3fm.png" srcset="/img/loading.gif" lazyload><br>Devicemapper 三个核心概念之间的关系如图，映射设备通过映射表关联到具体的物理目标设备。事实上，映射设备不仅可以通过映射表关联到物理目标设备，也可以关联到虚拟目标设备，然后虚拟目标设备再通过映射表关联到物理目标设备。</p>
+<p>Devicemapper 在内核中通过很多模块化的映射驱动（target driver）插件实现了对真正 IO 请求的拦截、过滤和转发工作，比如 Raid、软件加密、瘦供给（Thin Provisioning）等。</p>
+<p><strong>3）Devicemapper 数据存储机制</strong><br>当 Docker 使用 Devicemapper 作为文件存储驱动时，Docker 将镜像和容器的文件存储在瘦供给池（thinpool）中，并将这些内容挂载在<code>/var/lib/docker/devicemapper/</code>目录下。<br>这些目录储存 Docker 的容器和镜像相关数据，目录的数据内容和功能说明如下：</p>
+<ul>
+<li><strong>devicemapper 目录（&#x2F;var&#x2F;lib&#x2F;docker&#x2F;devicemapper&#x2F;devicemapper&#x2F;）</strong>：存储镜像和容器实际内容，该目录由一个或多个块设备构成。</li>
+<li><strong>metadata 目录（&#x2F;var&#x2F;lib&#x2F;docker&#x2F;devicemapper&#x2F;metadata&#x2F;）</strong>： 包含 Devicemapper 本身配置的元数据信息, 以 json 的形式配置，这些元数据记录了镜像层和容器层之间的关联信息。</li>
+<li><strong>mnt 目录（ &#x2F;var&#x2F;lib&#x2F;docker&#x2F;devicemapper&#x2F;mnt&#x2F;）</strong>：是容器的联合挂载点目录，未生成容器时，该目录为空，而容器存在时，该目录下的内容跟容器中一致。</li>
+</ul>
+<p><strong>4）Devicemapper 镜像分层与共享机制</strong><br>Devicemapper 使用专用的块设备实现镜像的存储，并且像 AUFS 一样使用了写时复制的技术来保障最大程度节省存储空间，所以<strong>Devicemapper 的镜像分层也是依赖快照来是实现的</strong>。<br><strong>Devicemapper 的每一镜像层都是其下一层的快照，最底层的镜像层是我们的瘦供给池</strong>，通过这种方式<br>实现镜像分层有以下优点。</p>
+<ul>
+<li>相同的镜像层，仅在磁盘上存储一次。例如，我有 10 个运行中的 busybox 容器，底层都使用了 busybox 镜像，那么 busybox 镜像只需要在磁盘上存储一次即可。</li>
+<li>快照是写时复制策略的实现，也就是说，当我们需要对文件进行修改时，文件才会被复制到读写层。</li>
+<li>相比对文件系统加锁的机制，Devicemapper 工作在块级别，因此可以实现同时修改和读写层中的多个块设备，比文件系统效率更高。</li>
+</ul>
+<p>当我们需要读取数据时，如果数据存在底层快照中，则向底层快照查询数据并读取。当我们需要写数据时，则向瘦供给池动态申请存储空间生成读写层，然后把数据复制到读写层进行修改。Devicemapper 默认每次申请的大小是 64K 或者 64K 的倍数，因此每次新生成的读写层的大小都是 64K 或者 64K 的倍数。<br>以下是一个运行中的 Ubuntu 容器示意图：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FuRUQ_bCBFXhU-bsmkGeqlzo5jNs.png" srcset="/img/loading.gif" lazyload><br>这个 Ubuntu 镜像一共有四层，每一层镜像都是下一层的快照，镜像的最底层是基础设备的快照。当容器运行时，容器是基于镜像的快照。综上，Devicemapper 实现镜像分层的根本原理就是快照。</p>
+<h1 id="4-OverlayFS"><a href="#4-OverlayFS" class="headerlink" title="4.OverlayFS"></a>4.OverlayFS</h1><h2 id="4-1-概述"><a href="#4-1-概述" class="headerlink" title="4.1 概述"></a>4.1 概述</h2><p>Overlay 是 Linux 内核 3.18 后支持的，也是一种 Union FS，和 AUFS 的多层不同的是 Overlay 只有两层：<strong>一个 upper 文件系统和一个 lower 文件系统，分别代表 Docker 的镜像层和容器层</strong>。<strong>当需要修改一个文件时，使用 CoW 将文件从只读的 lower 复制到可写的 upper 进行修改，结果也保存在 upper 层</strong>。在 Docker 中，底下的只读层就是 image，可写层就是 Container。结构如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/Fr1UF5wAhnRk3gRgR1-qQAtX_pSq.png" srcset="/img/loading.gif" lazyload></p>
+<div class="note note-success">
+            <p>OverlayFS 的发展分为两个阶段。2014 年，OverlayFS 第一个版本被合并到 Linux 内核 3.18 版本中，此时的 OverlayFS 在 Docker 中被称为 overlay 文件驱动。由于第一版的 overlay 文件系统存在很多弊端（例如运行一段时间后 Docker 会报 “too many links problem” 的错误）， Linux 内核在 4.0 版本对 overlay 做了很多必要的改进，此时的 OverlayFS 被称之为 overlay2 。</p><p>因此，在 Docker 中 OverlayFS 文件驱动被分为了两种，一种是早期的 overlay ，不推荐在生产环境中使用，另一种是更新和更稳定的 overlay2 ，推荐在生产环境中使用。下面的内容我们主要围绕 overlay2 展开。</p>
+          </div>
+
+<h2 id="4-2-示例"><a href="#4-2-示例" class="headerlink" title="4.2 示例"></a>4.2 示例</h2><p><strong>1）使用 overlay2 的先决条件</strong></p>
+<ul>
+<li>要想使用 overlay2 ，Docker 版本必须高于 17.06.02。</li>
+<li>如果你的操作系统是 RHEL 或 CentOS，Linux 内核版本必须使用 3.10.0-514 或者更高版本，其他 Linux 发行版的内核版本必须高于 4.0（例如 Ubuntu 或 Debian），你可以使用 uname -a 查看当前系统的内核版本。</li>
+<li>overlay2 最好搭配 xfs 文件系统使用，并且使用 xfs 作为底层文件系统时，d_type 必须开启。</li>
+</ul>
+<p>可以使用以下命令验证 d_type 是否开启：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">xfs_info /var/lib/docker | grep ftype</span><br>naming   =version 2              bsize=4096   ascii-ci=0 ftype=1<br></code></pre></td></tr></table></figure>
+
+<p>当输出结果中有 ftype&#x3D;1 时，表示 d_type 已经开启。如果你的输出结果为 ftype&#x3D;0，则需要重新格式化磁盘目录，命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo mkfs.xfs -f -n ftype=1 /path/to/disk</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2）初始化 &#x2F;var&#x2F;lib&#x2F;docker</strong><br>在生产环境中，推荐挂载<code>/var/lib/docker</code>目录到单独的磁盘或者磁盘分区，这样可以避免该目录写满影响主机的文件写入，并且把挂载信息写入到<code>/etc/fstab</code>，防止机器重启后挂载信息丢失。<br><strong>2.1）使用 lsblk（Linux 查看磁盘和块设备信息命令）命令查看本机磁盘信息：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">lsblk</span><br>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINT<br>vda 253:0 0 500G 0 disk<br>  -vda1 253:1 0 500G 0 part<br>vdb 253:16 0 500G 0 disk<br>  -vdb1 253:17 0 8G 0 part<br></code></pre></td></tr></table></figure>
+
+<p>可以看到，我的机器有两块磁盘，一块是 vda，一块是 vdb。其中 vda 已经被用来挂载系统根目录，这里我想把<code>/var/lib/docker</code>挂载到<code>vdb1</code>分区上。<br><strong>2.2）使用 mkfs 命令格式化磁盘 vdb1：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo mkfs.xfs -f -n ftype=1 /dev/vdb1</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2.3） 将挂载信息写入到 &#x2F;etc&#x2F;fstab，保证机器重启挂载目录不丢失：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;/dev/vdb1 /var/lib/docker xfs defaults,pquota 0 0&quot;</span> &gt;&gt; /etc/fstab</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2.4）使用 mount 命令使得挂载目录生效。</strong><br><strong>2.5）检查 ftype 是否配置生效</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">xfs_info /var/lib/docker | grep ftype</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>3）如何在 Docker 中配置 overlay2？</strong><br>当你的系统满足上面的条件后，就可以配置你的 Docker 存储驱动为 overlay2 了，具体配置步骤如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo systemctl stop docker</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">备份 /var/lib/docker 目录：</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">sudo <span class="hljs-built_in">cp</span> -au /var/lib/docker /var/lib/docker.back</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">在 /etc/docker 目录下创建 daemon.json 文件，如果该文件已经存在，则修改配置为以下内容：</span><br>&#123;<br>   &quot;storage-driver&quot;:&quot;overlay2&quot;,<br>   &quot;storage-opts&quot;:[<br>      &quot;overlay2.size=20G&quot;,<br>      &quot;overlay2.override_kernel_check=true&quot;<br>   ]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-3-原理"><a href="#4-3-原理" class="headerlink" title="4.3 原理"></a>4.3 原理</h2><p>overlay2 和 AUFS 类似，它将所有目录称之为层（layer），overlay2 的目录是镜像和容器分层的基础，而把这些层统一展现到同一的目录下的过程称为联合挂载（union mount）。<br>overlay2 把目录的下一层叫作 lowerdir ，上一层叫作 upperdir ，联合挂载后的结果叫作 merged 。</p>
+<div class="note note-success">
+            <p>overlay2 文件系统最多支持 128 个层数叠加，也就是说你的 Dockerfile 最多只能写 128 行，不过这在日常使用中足够了。</p>
+          </div>
+
+<p><strong>1）镜像在 overlay2 的存储情况</strong><br>下面我们通过拉取一个 Ubuntu 操作系统的镜像来看下 overlay2 是如何存放镜像文件的。<br>首先，我们通过以下命令拉取 Ubuntu 镜像（为了方便演示先清除本地所有容器和镜像）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">  docker pull ubuntu:16.04</span><br>16.04: Pulling from library/ubuntu<br>58690f9b18fc: Pull complete<br>b51569e7c507: Pull complete<br>da8ef40b9eca: Pull complete<br>fb15d46c38dc: Pull complete<br>Digest: sha256:20858ebbc96215d6c3c574f781133ebffdc7c18d98af4f294cc4c04871a6fe61<br>Status: Downloaded newer image<br></code></pre></td></tr></table></figure>
+
+<p>可以看到镜像一共被分为四层拉取，拉取完镜像后我们查看一下 overlay2 的目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> -l /var/lib/docker/overlay2/</span><br>总用量 0<br>drwx--x---. 4 root root     55 7月   4 03:28 267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3<br>drwx--x---. 4 root root     72 7月   4 03:28 3391745c4b8ac939496ace17637ad1d47113008112f84b7de7d948e68ac2108d<br>drwx--x---. 3 root root     47 7月   4 03:28 64a8a15dbe008f34c273d56428a8232aa7bafe118d03797da16cbe16a40e8cbf<br>drwx--x---. 4 root root     72 7月   4 03:28 ad6f39a4f7e70a683426b637bd6b2efda900d7aae2a3e0789a3f6e662ac5cc12<br>brw-------. 1 root root 253, 0 7月   3 21:53 backingFsBlockDev<br>drwx------. 2 root root    142 7月   4 03:28 l<br></code></pre></td></tr></table></figure>
+
+<p>可以看到 overlay2 目录下出现了四个镜像层目录和一个<code>l</code>目录，我们首先来查看一下<code>l</code>目录的内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> -l /var/lib/docker/overlay2/l</span><br>总用量 0<br>lrwxrwxrwx. 1 root root 72 7月   4 03:28 H7EQNFLUIFWHF4VPUIJGOIQ4SP -&gt; ../267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3/diff<br>lrwxrwxrwx. 1 root root 72 7月   4 03:28 UZ6YH5OJZCSLTRHQS4E6WMX7LE -&gt; ../64a8a15dbe008f34c273d56428a8232aa7bafe118d03797da16cbe16a40e8cbf/diff<br>lrwxrwxrwx. 1 root root 72 7月   4 03:28 VBWWM5IIS26QD76P7Z5UJOZOS7 -&gt; ../ad6f39a4f7e70a683426b637bd6b2efda900d7aae2a3e0789a3f6e662ac5cc12/diff<br>lrwxrwxrwx. 1 root root 72 7月   4 03:28 WE3LOBHPMA7CXZDCMGYRWBVZJE -&gt; ../3391745c4b8ac939496ace17637ad1d47113008112f84b7de7d948e68ac2108d/diff<br></code></pre></td></tr></table></figure>
+
+<p>可以看到<code>l</code>目录是一堆软连接，把一些较短的随机串软连到镜像层的<code>diff</code>文件夹下，这样做是为了避免达到<code>mount</code>命令参数的长度限制。<br>下面我们查看任意一个镜像层下的文件内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> -l /var/lib/docker/overlay2/267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3</span><br>总用量 8<br>drwxr-xr-x. 3 root root 17 7月   4 03:28 diff<br>-rw-r--r--. 1 root root 26 7月   4 03:28 link<br>-rw-r--r--. 1 root root 86 7月   4 03:28 lower<br>drwx------. 2 root root  6 7月   4 03:28 work<br></code></pre></td></tr></table></figure>
+
+<p><strong>镜像层的 link 文件内容为该镜像层的短 ID，diff 文件夹为该镜像层的改动内容，lower 文件为该层的所有父层镜像的短 ID。</strong></p>
+<p>我们可以通过<code>docker image inspect</code>命令来查看某个镜像的层级关系，例如我想查看刚刚下载的 Ubuntu 像之间的层级关系，可以使用以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker image inspect ubuntu:16.04</span><br>   &quot;GraphDriver&quot;: &#123;<br>            &quot;Data&quot;: &#123;<br>                &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/ad6f39a4f7e70a683426b637bd6b2efda900d7aae2a3e0789a3f6e662ac5cc12/diff:/var/lib/docker/overlay2/3391745c4b8ac939496ace17637ad1d47113008112f84b7de7d948e68ac2108d/diff:/var/lib/docker/overlay2/64a8a15dbe008f34c273d56428a8232aa7bafe118d03797da16cbe16a40e8cbf/diff&quot;,<br>                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3/merged&quot;,<br>                &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3/diff&quot;,<br>                &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3/work&quot;<br>            &#125;,<br>            &quot;Name&quot;: &quot;overlay2&quot;<br>        &#125;,<br>        &quot;RootFS&quot;: &#123;<br>            &quot;Type&quot;: &quot;layers&quot;,<br>            &quot;Layers&quot;: [<br>                &quot;sha256:be96a3f634de79f523f07c7e4e0216c28af45eb5776e7a6238a2392f71e01069&quot;,<br>                &quot;sha256:df54c846128da3c71cc11b2150a3df39ec86fb170e299765daf6bb016a0705c2&quot;,<br>                &quot;sha256:47ef83afae74745639f6738a05fe5320fcfca9e6c7765fba4f25e270bc0df9dc&quot;,<br>                &quot;sha256:1251204ef8fc20da275e09f6e3ab9205421d4ff34732f2d50a1d3e86d2995edd&quot;<br>            ]<br>        &#125;,<br>        &quot;Metadata&quot;: &#123;<br>            &quot;LastTagTime&quot;: &quot;0001-01-01T00:00:00Z&quot;<br>        &#125;<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>其中 MergedDir 代表当前镜像层在 overlay2 存储下的目录，LowerDir 代表当前镜像的父层关系，使用冒号分隔，冒号最后代表该镜像的最底层。</strong></p>
+<p><strong>2）容器在 overlay2 的存储情况</strong><br>下面我们将镜像运行起来成为容器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker run --name=ubuntu -d ubuntu:16.04 <span class="hljs-built_in">sleep</span> 3600</span><br></code></pre></td></tr></table></figure>
+
+<p>我们使用<code>docker inspect</code>命令来查看一下容器的工作目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">docker inspect ubuntu</span><br>     &quot;GraphDriver&quot;: &#123;<br>            &quot;Data&quot;: &#123;<br>                &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/522e7efc68bd1e44ef18ce48cd042c3a6ba843e32d1bba29aed50f692f7dae49-init/diff:/var/lib/docker/overlay2/267a58f784244bbd37d04a4d5538dfc7830bd127c68fa6d08a67ac632b4586b3/diff:/var/lib/docker/overlay2/ad6f39a4f7e70a683426b637bd6b2efda900d7aae2a3e0789a3f6e662ac5cc12/diff:/var/lib/docker/overlay2/3391745c4b8ac939496ace17637ad1d47113008112f84b7de7d948e68ac2108d/diff:/var/lib/docker/overlay2/64a8a15dbe008f34c273d56428a8232aa7bafe118d03797da16cbe16a40e8cbf/diff&quot;,<br>                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/522e7efc68bd1e44ef18ce48cd042c3a6ba843e32d1bba29aed50f692f7dae49/merged&quot;,<br>                &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/522e7efc68bd1e44ef18ce48cd042c3a6ba843e32d1bba29aed50f692f7dae49/diff&quot;,<br>                &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/522e7efc68bd1e44ef18ce48cd042c3a6ba843e32d1bba29aed50f692f7dae49/work&quot;<br>            &#125;,<br>            &quot;Name&quot;: &quot;overlay2&quot;<br>        &#125;,<br></code></pre></td></tr></table></figure>
+
+<p><code>MergedDir</code>后面的内容即为容器层的工作目录，<code>LowerDir</code>为容器所依赖的镜像层目录。<br>然后我们查看下 overlay2 目录下的内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> -l /var/lib/docker/overlay2/</span><br>drwx--x---. 4 root root     72 7月   4 03:39 522e7efc68bd1e44ef18ce48cd042c3a6ba843e32d1bba29aed50f692f7dae49-init<br>......<br></code></pre></td></tr></table></figure>
+
+<p>可以看到 overlay2 目录下增加了容器层相关的目录，我们再来查看一下容器层下的内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> -l /var/lib/docker/overlay2/522e7efc68bd1e44ef18ce48cd042c3a6ba843e32d1bba29aed50f692f7dae49-init</span><br>-rw-------. 1 root root   0 7月   4 03:39 committed<br>drwxr-xr-x. 4 root root  46 7月   4 03:39 diff<br>-rw-r--r--. 1 root root  26 7月   4 03:39 link<br>-rw-r--r--. 1 root root 115 7月   4 03:39 lower<br>drwx------. 3 root root  18 7月   4 03:39 work<br></code></pre></td></tr></table></figure>
+
+<p><code>link</code>和<code>lower</code>文件与镜像层的功能一致，link 文件内容为该容器层的短 ID，lower 文件为该层的所有父层镜像的短 ID 。<strong>diff 目录为容器的读写层，容器内修改的文件都会在 diff 中出现，merged 目录为分层文件联合挂载后的结果，也是容器内的工作目录</strong>。</p>
+<p>总体来说，overlay2 是这样储存文件的：** overlay2 将镜像层和容器层都放在单独的目录，并且有唯一 ID，每一层仅存储发生变化的文件，最终使用联合挂载技术将容器层和镜像层的所有文件统一挂载到容器中，使得容器中看到完整的系统文件**。</p>
+<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5.总结"></a>5.总结</h1><div class="note note-success">
+            <p>通常情况下， overlay2 会比 AUFS 和 Devicemapper 性能更好，而且更加稳定，因为 overlay2<br>在 inode 优化上更加高效。因此在生产环境中推荐使用 overlay2 作为 Docker 的文件驱动。</p><p>overlay2 目前已经是 Docker 官方推荐的文件系统了，也是目前安装 Docker 时默认的文件系统，因为<br>overlay2 在生产环境中不仅有着较高的性能，它的稳定性也极其突出。但是 overlay2 的使用还是有一<br>些限制条件的，例如要求 Docker 版本必须高于 17.06.02，内核版本必须高于 4.0 等。因此，在生产环<br>境中，如果你的环境满足使用 overlay2 的条件，请尽量使用 overlay2 作为 Docker 的联合文件系统。</p>
+          </div>
+
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a target="_blank" rel="noopener" href="http://dockone.io/article/1513">http://dockone.io/article/1513</a><br><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/17921?cid=100015201">https://time.geekbang.org/column/article/17921?cid=100015201</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" class="category-chain-item">云原生</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/" class="category-chain-item">Docker容器技术</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="category-chain-item">Docker进阶</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>六、 Docker StorageDriver</div>
+      <div>https://kissy.wiki/2022/07/04/docker-storage-driver/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Jerry</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年7月4日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/07/05/docker-network/" title="七、Docker网络">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">七、Docker网络</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/07/03/docker-volume/" title="五、Docker Volume使用与原理">
+                        <span class="hidden-mobile">五、Docker Volume使用与原理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'kissycn/hexo-comment');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

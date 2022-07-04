@@ -16,19 +16,19 @@
   <meta name="author" content="Jerry">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Dockerfile的使用机器注意事项">
+    <meta name="description" content="Dockerfile使用介绍，Dockerfile常见指令及其参数介绍，Dockerfile构建最佳实践等。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="二、Dockerfile镜像指令">
 <meta property="og:url" content="https://kissy.wiki/2022/06/21/docker-file/index.html">
 <meta property="og:site_name" content="Jerry 的技术博客">
-<meta property="og:description" content="Dockerfile的使用机器注意事项">
+<meta property="og:description" content="Dockerfile使用介绍，Dockerfile常见指令及其参数介绍，Dockerfile构建最佳实践等。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
 <meta property="article:published_time" content="2022-06-20T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-03T09:47:18.371Z">
+<meta property="article:modified_time" content="2022-07-04T13:42:57.057Z">
 <meta property="article:author" content="Jerry">
-<meta property="article:tag" content="Docker">
 <meta property="article:tag" content="Dockerfile">
+<meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
   
@@ -316,7 +316,7 @@
         aria-expanded="true"
       >
         云原生
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -343,7 +343,7 @@
         aria-expanded="true"
       >
         Docker容器技术
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -425,7 +425,7 @@
         aria-expanded="false"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -457,13 +457,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
            ">
-          <span class="category-post">五、Docker网络</span>
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -488,7 +494,7 @@
         aria-expanded="true"
       >
         Docker容器技术
-        <span class="list-group-count">(6)</span>
+        <span class="list-group-count">(7)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -570,7 +576,7 @@
         aria-expanded="false"
       >
         Docker进阶
-        <span class="list-group-count">(3)</span>
+        <span class="list-group-count">(4)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -602,13 +608,19 @@
     
       
       
-        <a href="/2022/07/05/docker-network/" title="五、Docker网络"
+        <a href="/2022/07/04/docker-storage-driver/" title="六、 Docker StorageDriver"
            class="list-group-item list-group-item-action
            ">
-          <span class="category-post">五、Docker网络</span>
+          <span class="category-post">六、 Docker StorageDriver</span>
         </a>
       
     
+      
+      
+        <a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E8%BF%9B%E9%98%B6/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
   </div>
 
         
@@ -709,7 +721,10 @@
 <li>检查 Dockerfile 的语法</li>
 <li>依次执行 Dockerfile 中的指令，根据指令生成中间过度镜像(存储在本地，为之后的指令或构建作缓存)</li>
 </ol>
-<p>注意：为了加快构建速度，减少传递给 docker 服务的文件数量，最好将 Dockerfile 放在单独的空目录中。如果目录中含有大量文件，可以使用<code>.dockerignore</code>来忽略构建时用不到的文件，例如：</p>
+<div class="note note-warning">
+            <p>注意：为了加快构建速度，减少传递给 docker 服务的文件数量，最好将 Dockerfile 放在单独的空目录中。如果目录中含有大量文件，可以使用<code>.dockerignore</code>来忽略构建时用不到的文件，例如：</p>
+          </div>
+
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"># comment<br>*/temp*<br>*<span class="hljs-comment">/*/temp*</span><br><span class="hljs-comment">temp?</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="1-2-镜像缓存机制"><a href="#1-2-镜像缓存机制" class="headerlink" title="1.2 镜像缓存机制"></a>1.2 镜像缓存机制</h2><p>当在构建或者下载镜像时候，当镜像层已经存在的时候则直接使用缓存， 不需要进行重新构建镜像，如果我们希望在构建镜像时不使用缓存，可以在 docker build 命令中加上<code>–no-cache</code>参数。如果我们改变 Dockerfile 指令的执行顺序，或者修改或添加指令，都会使缓存失效。</p>
@@ -720,7 +735,11 @@
             <p>缓存失效：简单来说就是如果第 n 层有改动，则 n 层以后的缓存都会失效，大多数情况下判断有无改动的方法是判断这层的指令和缓存中的构建指令是否一致，但是对于 COPY 和 ADD 命令会计算镜像内的文件和构建目录文件的校验和然后做比较来判断本层是否有改动。</p>
           </div>
 
-<h2 id="1-3-格式要求"><a href="#1-3-格式要求" class="headerlink" title="1.3 格式要求"></a>1.3 格式要求</h2><p>虽然 Dockerfile 并不区分大小写，但还是约定指令使用大写。<br>Dockerfile 的第一条可执行指令必须是 FROM。<br>以#开头的是注释，行内的#都被当做参数，并且不支持续行。</p>
+<h2 id="1-3-格式要求"><a href="#1-3-格式要求" class="headerlink" title="1.3 格式要求"></a>1.3 格式要求</h2><ul>
+<li>虽然 Dockerfile 并不区分大小写，但还是约定指令使用大写。</li>
+<li>Dockerfile 的第一条可执行指令必须是 FROM。</li>
+<li>以#开头的是注释，行内的#都被当做参数，并且不支持续行。</li>
+</ul>
 <h1 id="2-Dockerfile-指令"><a href="#2-Dockerfile-指令" class="headerlink" title="2.Dockerfile 指令"></a>2.Dockerfile 指令</h1><p>Dockerfile 是一个文本文件，其内包含了一条条的指令(Instruction)，每一条指令构建一层，因此每一条指令的内容，就是描述该层应当如何构建，常用的指令如下：</p>
 <h3 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h3><p><strong>用途：构建的镜像继承自某个 base image</strong>。FROM 指令必须是 Dockerfile 的第一个指令，可以使用多次来构建多个镜像，以最后一个镜像的 ID 为输出值。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">FROM [--platform=&lt;platform&gt;] &lt;image&gt; [AS &lt;name&gt;]<br>FROM [--platform=&lt;platform&gt;] &lt;image&gt;[:&lt;tag&gt;] [AS &lt;name&gt;]<br>FROM [--platform=&lt;platform&gt;] &lt;image&gt;[@&lt;digest&gt;] [AS &lt;name&gt;]<br></code></pre></td></tr></table></figure>
@@ -909,9 +928,9 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Docker/">#Docker</a>
-      
         <a href="/tags/Dockerfile/">#Dockerfile</a>
+      
+        <a href="/tags/Docker/">#Docker</a>
       
     </div>
   
@@ -966,9 +985,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/06/21/notion-hexo-github/" title="使用Notion+Hexo+Github搭建技术博客">
+                      <a href="/2022/06/24/docker-cli-command/" title="三、DockerCLI容器指令">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">使用Notion+Hexo+Github搭建技术博客</span>
+                        <span class="hidden-mobile">三、DockerCLI容器指令</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
