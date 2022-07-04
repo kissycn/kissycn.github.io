@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
 <meta property="article:published_time" content="2022-07-04T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-04T13:48:02.712Z">
+<meta property="article:modified_time" content="2022-07-04T13:51:14.510Z">
 <meta property="article:author" content="Jerry">
 <meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary_large_image">
@@ -744,7 +744,7 @@
 <ul>
 <li><strong>veth 与 bridge 的关系</strong></li>
 </ul>
-<p><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FoqklU2oZzHSxq7HuRgfx-sGu4jE.png" srcset="/img/loading.gif" lazyload><br>bridge 就像一台交换机，而 veth 就像一根网线，通过交换机和网线可以把两个不同 Net Namespace 的容器连通，使得它们可以互相通信。</p>
+<p><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FoqklU2oZzHSxq7HuRgfx-sGu4jE.png" srcset="/img/loading.gif" lazyload><br>bridge 就像一台交换机，而 veth 就像一根网线，通过交换机和网线可以把两个不同 Net Namespace 的容器连通，使得它们可以互相通信。</p>
 <div class="note note-success">
             <p>Docker 的 bridge 模式也是这种原理。Docker 启动时，libnetwork 会在主机上创建<code>docker0</code>网桥，docker0 网桥就相当于上图中的交换机，而 Docker 创建出的 brige 模式的容器则都会连接 docker0 上，从而实现网络互通。</p>
           </div>

@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kissy.wiki/yuque_images/header/dockerfile.jpeg">
 <meta property="article:published_time" content="2022-07-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-04T13:46:18.155Z">
+<meta property="article:modified_time" content="2022-07-04T13:51:14.470Z">
 <meta property="article:author" content="Jerry">
 <meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary_large_image">
@@ -726,7 +726,7 @@
 <p>所以无论有多少个容器共享同一个 image，所做的写操作都是对从 image 中复制到自己的文件系统中的复本上进行，并不会修改 image 的源文件，且多个容器操作同一个文件，会在每个容器的文件系统里生成一个复本，每个容器修改的都是自己的复本，相互隔离，相互不影响。<strong>使用 CoW 可以有效的提高磁盘的利用率</strong>。</p>
 <h2 id="1-2-用时分配（allocate-on-demand）"><a href="#1-2-用时分配（allocate-on-demand）" class="headerlink" title="1.2 用时分配（allocate-on-demand）"></a>1.2 用时分配（allocate-on-demand）</h2><p>而用时分配是用在：<strong>原本没有这个文件的场景，只有在要新写入一个文件时才分配空间，这样可以提高存储资源的利用率</strong>。比如启动一个容器，并不会为这个容器预分配一些磁盘空间，而是当有新文件写入时，才按需分配新空间。</p>
 <h1 id="2-AUFS"><a href="#2-AUFS" class="headerlink" title="2.AUFS"></a>2.AUFS</h1><h2 id="2-1-概述"><a href="#2-1-概述" class="headerlink" title="2.1 概述"></a>2.1 概述</h2><p>AUFS（AnotherUnionFS）是一种 Union FS，是文件级的存储驱动。<strong>AUFS 能透明覆盖一或多个现有文件系统的层状文件系统，把多层合并成文件系统的单层表示</strong>，<strong>简单来说就是支持将不同目录挂载到同一个虚拟文件系统下的文件系统</strong>。</p>
-<p>这种文件系统可以一层一层地叠加修改文件。<strong>无论底下有多少层都是只读的，只有最上层的文件系统是可写的</strong>。当需要修改一个文件时，AUFS 创建该文件的一个副本，使用 CoW 将文件从只读层复制到可写层进行修改，结果也保存在可写层。在 Docker 中，底下的只读层就是 image，可写层就是 Container。结构如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FoIUkTpTy6jdEDUzOT3mPzZg00i2.png" srcset="/img/loading.gif" lazyload></p>
+<p>这种文件系统可以一层一层地叠加修改文件。<strong>无论底下有多少层都是只读的，只有最上层的文件系统是可写的</strong>。当需要修改一个文件时，AUFS 创建该文件的一个副本，使用 CoW 将文件从只读层复制到可写层进行修改，结果也保存在可写层。在 Docker 中，底下的只读层就是 image，可写层就是 Container。结构如下图所示：<br><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FoIUkTpTy6jdEDUzOT3mPzZg00i2.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-2-示例"><a href="#2-2-示例" class="headerlink" title="2.2 示例"></a>2.2 示例</h2><p>AUFS 目前并未被合并到 Linux 内核主线，因此只有 Ubuntu 和 Debian 等少数操作系统支持 AUFS。你可以使用以下命令查看你的系统是否支持 AUFS：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">执行以上命令后，如果输出结果包含 aufs ，则代表当前操作系统支持 AUFS</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">grep aufs /proc/filesystems</span><br>nodev aufs<br></code></pre></td></tr></table></figure>
 
@@ -761,7 +761,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">ls</span> container1/</span><br>container1.txt  image1.txt<br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cat</span> container1/image1.txt</span><br>Hello, Image layer1 changed!<br></code></pre></td></tr></table></figure>
 
 <p><strong>发现 AUFS 在 “容器层” 自动创建了 image1.txt 文件，并且内容为我们刚才写入的内容。</strong></p>
-<h2 id="2-3-原理"><a href="#2-3-原理" class="headerlink" title="2.3 原理"></a>2.3 原理</h2><p>AUFS 是联合文件系统，意味着它在主机上使用多层目录存储，每一个目录在 AUFS 中都叫作分支，而在 Docker 中则称之为层（layer），但最终呈现给用户的则是一个普通单层的文件系统，我们把多层以单一层的方式呈现出来的过程叫作联合挂载。<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/Fqi04pwC0nLgmUHuGu4pfHyvm8jN.png" srcset="/img/loading.gif" lazyload><br>如图 1 所示，每一个镜像层和容器层都是<code>/var/lib/docker</code>下的一个子目录，镜像层和容器层都<code>aufs/diff</code>目录下，每一层的目录名称是镜像或容器的 ID 值，联合挂载点在<code>aufs/mnt</code>目录下，mnt 目录是真正的容器工作目录。</p>
+<h2 id="2-3-原理"><a href="#2-3-原理" class="headerlink" title="2.3 原理"></a>2.3 原理</h2><p>AUFS 是联合文件系统，意味着它在主机上使用多层目录存储，每一个目录在 AUFS 中都叫作分支，而在 Docker 中则称之为层（layer），但最终呈现给用户的则是一个普通单层的文件系统，我们把多层以单一层的方式呈现出来的过程叫作联合挂载。<br><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/Fqi04pwC0nLgmUHuGu4pfHyvm8jN.png" srcset="/img/loading.gif" lazyload><br>如图 1 所示，每一个镜像层和容器层都是<code>/var/lib/docker</code>下的一个子目录，镜像层和容器层都<code>aufs/diff</code>目录下，每一层的目录名称是镜像或容器的 ID 值，联合挂载点在<code>aufs/mnt</code>目录下，mnt 目录是真正的容器工作目录。</p>
 <p><strong>aufs 读写原理</strong><br>AUFS 的工作过程中对文件的操作分为读取文件和修改文件。下面我们分别来看下 AUFS 对于不同的文件操作是如何工作的。<br><strong>1.）读取文件</strong><br>当我们在容器中读取文件时，可能会有以下场景：</p>
 <ul>
 <li>文件在容器层中存在时：直接从容器层读取。</li>
@@ -785,7 +785,7 @@
 
 <h1 id="3-Devicemapper"><a href="#3-Devicemapper" class="headerlink" title="3.Devicemapper"></a>3.Devicemapper</h1><h2 id="3-1-概述"><a href="#3-1-概述" class="headerlink" title="3.1 概述"></a>3.1 概述</h2><p>Device mapper 是 Linux 内核 2.6.9 后支持的，<strong>提供的一种从逻辑设备到物理设备的映射框架机制，在该机制下，用户可以很方便的根据自己的需要制定实现存储资源的管理策略</strong>。前面讲的 AUFS 和 OverlayFS 都是<code>文件级存储</code>，而 Device mapper 是<code>块级存储</code>，所有的操作都是直接对块进行操作，而不是文件。</p>
 <p>Device mapper 驱动会先在块设备上创建一个资源池，然后在资源池上创建一个带有文件系统的基本设备，所有镜像都是这个基本设备的快照，而容器则是镜像的快照。所以在容器里看到文件系统是资源池上基本设备的文件系统的快照，并不有为容器分配空间。</p>
-<p><strong>当要写入一个新文件时，在容器的镜像内为其分配新的块并写入数据，这个叫用时分配。当要修改已有文件时，再使用 CoW 为容器快照分配块空间，将要修改的数据复制到在容器快照中新的块里再进行修改。</strong>Device mapper 驱动默认会创建一个 100G 的文件包含镜像和容器。每一个容器被限制在 10G 大小的卷内，可以自己配置调整。结构如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FpL9UhZigZgcSUVbrn9ue4dCDFlf.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>当要写入一个新文件时，在容器的镜像内为其分配新的块并写入数据，这个叫用时分配。当要修改已有文件时，再使用 CoW 为容器快照分配块空间，将要修改的数据复制到在容器快照中新的块里再进行修改。</strong>Device mapper 驱动默认会创建一个 100G 的文件包含镜像和容器。每一个容器被限制在 10G 大小的卷内，可以自己配置调整。结构如下图所示：<br><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FpL9UhZigZgcSUVbrn9ue4dCDFlf.png" srcset="/img/loading.gif" lazyload></p>
 <div class="note note-success">
             <p>Devicemapper 提供了一种将物理块设备映射到虚拟块设备的机制，目前 Linux 下比较流行的 LVM（Logical Volume Manager 是 Linux 下对磁盘分区进行管理的一种机制）和软件磁盘阵列（将多个较小的磁盘整合成为一个较大的磁盘设备用于扩大磁盘存储和提供数据可用性）都是基于 Devicemapper 机制实现的。</p>
           </div>
@@ -812,7 +812,7 @@
 <li><strong>目标设备（target device）</strong>：目标设备是映射设备对应的物理设备或者物理设备的某一个逻辑分段，是真正存在于物理机上的设备。</li>
 <li><strong>映射表（map table）</strong>：映射表记录了映射设备到目标设备的映射关系，它记录了映射设备在目标设备的起始地址、范围和目标设备的类型等变量。</li>
 </ul>
-<p><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FmiYXLqsKbW3-qTWDfsv8nm3u3fm.png" srcset="/img/loading.gif" lazyload><br>Devicemapper 三个核心概念之间的关系如图，映射设备通过映射表关联到具体的物理目标设备。事实上，映射设备不仅可以通过映射表关联到物理目标设备，也可以关联到虚拟目标设备，然后虚拟目标设备再通过映射表关联到物理目标设备。</p>
+<p><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FmiYXLqsKbW3-qTWDfsv8nm3u3fm.png" srcset="/img/loading.gif" lazyload><br>Devicemapper 三个核心概念之间的关系如图，映射设备通过映射表关联到具体的物理目标设备。事实上，映射设备不仅可以通过映射表关联到物理目标设备，也可以关联到虚拟目标设备，然后虚拟目标设备再通过映射表关联到物理目标设备。</p>
 <p>Devicemapper 在内核中通过很多模块化的映射驱动（target driver）插件实现了对真正 IO 请求的拦截、过滤和转发工作，比如 Raid、软件加密、瘦供给（Thin Provisioning）等。</p>
 <p><strong>3）Devicemapper 数据存储机制</strong><br>当 Docker 使用 Devicemapper 作为文件存储驱动时，Docker 将镜像和容器的文件存储在瘦供给池（thinpool）中，并将这些内容挂载在<code>/var/lib/docker/devicemapper/</code>目录下。<br>这些目录储存 Docker 的容器和镜像相关数据，目录的数据内容和功能说明如下：</p>
 <ul>
@@ -826,8 +826,8 @@
 <li>快照是写时复制策略的实现，也就是说，当我们需要对文件进行修改时，文件才会被复制到读写层。</li>
 <li>相比对文件系统加锁的机制，Devicemapper 工作在块级别，因此可以实现同时修改和读写层中的多个块设备，比文件系统效率更高。</li>
 </ul>
-<p>当我们需要读取数据时，如果数据存在底层快照中，则向底层快照查询数据并读取。当我们需要写数据时，则向瘦供给池动态申请存储空间生成读写层，然后把数据复制到读写层进行修改。Devicemapper 默认每次申请的大小是 64K 或者 64K 的倍数，因此每次新生成的读写层的大小都是 64K 或者 64K 的倍数。<br>以下是一个运行中的 Ubuntu 容器示意图：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FuRUQ_bCBFXhU-bsmkGeqlzo5jNs.png" srcset="/img/loading.gif" lazyload><br>这个 Ubuntu 镜像一共有四层，每一层镜像都是下一层的快照，镜像的最底层是基础设备的快照。当容器运行时，容器是基于镜像的快照。综上，Devicemapper 实现镜像分层的根本原理就是快照。</p>
-<h1 id="4-OverlayFS"><a href="#4-OverlayFS" class="headerlink" title="4.OverlayFS"></a>4.OverlayFS</h1><h2 id="4-1-概述"><a href="#4-1-概述" class="headerlink" title="4.1 概述"></a>4.1 概述</h2><p>Overlay 是 Linux 内核 3.18 后支持的，也是一种 Union FS，和 AUFS 的多层不同的是 Overlay 只有两层：<strong>一个 upper 文件系统和一个 lower 文件系统，分别代表 Docker 的镜像层和容器层</strong>。<strong>当需要修改一个文件时，使用 CoW 将文件从只读的 lower 复制到可写的 upper 进行修改，结果也保存在 upper 层</strong>。在 Docker 中，底下的只读层就是 image，可写层就是 Container。结构如下图所示：<br><img src="https://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/Fr1UF5wAhnRk3gRgR1-qQAtX_pSq.png" srcset="/img/loading.gif" lazyload></p>
+<p>当我们需要读取数据时，如果数据存在底层快照中，则向底层快照查询数据并读取。当我们需要写数据时，则向瘦供给池动态申请存储空间生成读写层，然后把数据复制到读写层进行修改。Devicemapper 默认每次申请的大小是 64K 或者 64K 的倍数，因此每次新生成的读写层的大小都是 64K 或者 64K 的倍数。<br>以下是一个运行中的 Ubuntu 容器示意图：<br><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/FuRUQ_bCBFXhU-bsmkGeqlzo5jNs.png" srcset="/img/loading.gif" lazyload><br>这个 Ubuntu 镜像一共有四层，每一层镜像都是下一层的快照，镜像的最底层是基础设备的快照。当容器运行时，容器是基于镜像的快照。综上，Devicemapper 实现镜像分层的根本原理就是快照。</p>
+<h1 id="4-OverlayFS"><a href="#4-OverlayFS" class="headerlink" title="4.OverlayFS"></a>4.OverlayFS</h1><h2 id="4-1-概述"><a href="#4-1-概述" class="headerlink" title="4.1 概述"></a>4.1 概述</h2><p>Overlay 是 Linux 内核 3.18 后支持的，也是一种 Union FS，和 AUFS 的多层不同的是 Overlay 只有两层：<strong>一个 upper 文件系统和一个 lower 文件系统，分别代表 Docker 的镜像层和容器层</strong>。<strong>当需要修改一个文件时，使用 CoW 将文件从只读的 lower 复制到可写的 upper 进行修改，结果也保存在 upper 层</strong>。在 Docker 中，底下的只读层就是 image，可写层就是 Container。结构如下图所示：<br><img src="http://hexo-blogs.oss-cn-hangzhou.aliyuncs.com/blog/image/yuque/cn/Fr1UF5wAhnRk3gRgR1-qQAtX_pSq.png" srcset="/img/loading.gif" lazyload></p>
 <div class="note note-success">
             <p>OverlayFS 的发展分为两个阶段。2014 年，OverlayFS 第一个版本被合并到 Linux 内核 3.18 版本中，此时的 OverlayFS 在 Docker 中被称为 overlay 文件驱动。由于第一版的 overlay 文件系统存在很多弊端（例如运行一段时间后 Docker 会报 “too many links problem” 的错误）， Linux 内核在 4.0 版本对 overlay 做了很多必要的改进，此时的 OverlayFS 被称之为 overlay2 。</p><p>因此，在 Docker 中 OverlayFS 文件驱动被分为了两种，一种是早期的 overlay ，不推荐在生产环境中使用，另一种是更新和更稳定的 overlay2 ，推荐在生产环境中使用。下面的内容我们主要围绕 overlay2 展开。</p>
           </div>
